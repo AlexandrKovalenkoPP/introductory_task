@@ -1,0 +1,5 @@
+# phpstorm project files
+.idea
+
+# папка базы данных
+db_data/

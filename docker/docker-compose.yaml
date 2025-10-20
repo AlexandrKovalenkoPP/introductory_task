@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------
+  # 1. Сервис MySQL 8.5
+  # ----------------------------------------------------------------------
+  mysql:
+    container_name: yii2-mysql
+    image: mysql:8.0
+    ports:
+      - ${MYSQL_HOST_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - ../db_data:/var/lib/mysql
+    networks:
+      - yii2-network
+    restart: always
+
+  # ----------------------------------------------------------------------
+  # 2. Сервис PHP-FPM
+  # ----------------------------------------------------------------------
+  php-fpm:
+    container_name: yii2-php-fpm
+    build:
+      context: ../
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - ../application:/app
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_ROOT_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    networks:
+      - yii2-network
+    depends_on:
+      - mysql
+    restart: always
+
+  # ----------------------------------------------------------------------
+  # 3. Сервис NGINX
+  # ----------------------------------------------------------------------
+  nginx:
+    container_name: yii2-nginx
+    build:
+      context: ../
+      dockerfile: docker/nginx/Dockerfile
+    volumes:
+      - ./application:/app
+      - ../docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - ${NGINX_HOST_PORT}:80
+    environment:
+      APP_DOMAIN_ENV: ${APP_DOMAIN}
+      YII_APP_PUBLIC_DIR_ENV: ${YII_APP_PUBLIC_DIR}
+    networks:
+      - yii2-network
+    depends_on:
+      - php-fpm
+    restart: always
+
+# ----------------------------------------------------------------------
+# Объявление сети
+# ----------------------------------------------------------------------
+networks:
+  yii2-network:
+    driver: bridge
