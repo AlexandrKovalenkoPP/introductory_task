@@ -77,7 +77,7 @@ class OrderController extends Controller
         ]);
 
         // Передаем провайдер во вью
-        return $this->render('index', [
+        return $this->render('orders', [
             'dataProvider' => $dataProvider,
         ]);
     }
