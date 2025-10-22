@@ -2,48 +2,18 @@
 
 namespace app\controllers;
 
-use app\repositories\Orders;
+use app\Entity\Table\Pagination;
+use app\models\Orders;
+use app\repositories\OrdersRepository;
 use Yii;
-use yii\data\ActiveDataProvider;
-use yii\filters\AccessControl;
 use yii\web\Controller;
-use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 
 class OrderController extends Controller
 {
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'only' => ['logout'],
-                'rules' => [
-                    [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function actions()
+    public function actions(): array
     {
         return [
             'error' => [
@@ -59,52 +29,57 @@ class OrderController extends Controller
     /**
      * Displays homepage.
      *
+     * @param null $status
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($status = null): string
     {
-        // Создаем провайдер данных
-        $dataProvider = new ActiveDataProvider([
-            'query' => \app\models\Orders::find(),//Order::find(), // Выбираем все записи из модели Order
-            'pagination' => [
-                'pageSize' => 20, // Устанавливаем размер страницы
-            ],
-            'sort' => [
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC, // Сортируем по дате создания по убыванию
-                ]
-            ],
-        ]);
+        $limit = 10;
+        $params = Yii::$app->request->queryParams;
 
-        // Передаем провайдер во вью
+        if ($status !== null) {
+            $params['status'] = $status;
+        }
+
+        $params['page'] = $params['page'] ?? 1;
+        $params['limit'] = $params['limit'] ?? $limit;
+
+        $amount = OrdersRepository::getAmountOrders($params);
+
         return $this->render('orders', [
-            'dataProvider' => $dataProvider,
+            'orders' => OrdersRepository::getOrders($params),
+            'columns' => OrdersRepository::getColumns(),
+            'status' => $status,
+            'pages' => (new Pagination($amount, $params['page'], $limit))->generatePages(),
+            'rowStart' => 1,
+            'rowEnd' => $limit,
+            'total' => $amount,
         ]);
     }
 
-    public function actionPending()
+    public function actionPending(): string
     {
-        return Orders::getOrders('pending');
+        return $this->actionIndex(Orders::STATUS_PENDING);
     }
 
-    public function actionInProgress()
+    public function actionInProgress(): string
     {
-
+        return $this->actionIndex(Orders::STATUS_IN_PROGRESS);
     }
 
-    public function actionCompleted()
+    public function actionCompleted(): string
     {
-
+        return $this->actionIndex(Orders::STATUS_COMPLETED);
     }
 
-    public function actionCancelled()
+    public function actionCancelled(): string
     {
-        
+        return $this->actionIndex(Orders::STATUS_CANCELED);
     }
 
-    public function actionError()
+    public function actionFail(): string
     {
-        
+        return $this->actionIndex(Orders::STATUS_FAIL);
     }
 
 }

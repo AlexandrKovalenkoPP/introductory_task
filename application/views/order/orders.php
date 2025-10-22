@@ -1,12 +1,72 @@
 <?php
 // ...
 use app\assets\OrderPageAsset;
+use app\Entity\Table\ColumnsHeader;
 use app\models\Orders;
+use app\repositories\ServicesRepository;use yii\helpers\Html;
+use yii\helpers\Url;
 
-// Используем наш новый бандл
 OrderPageAsset::register($this);
-// ...
+
+$currentAction = Yii::$app->controller->action->id;
+$controllerId = Yii::$app->controller->id;
+$baseRoute = [$controllerId . '/' . $currentAction];
+$currentParams = Yii::$app->request->queryParams;
+
+/**
+ * Генерирует HTML для выпадающего меню фильтрации.
+ * @param string $title Метка кнопки ('Service', 'Mode').
+ * @param array $list Данные для списка [id => ['name' => 'Name', 'amount' => 123]] или [id => 'Name'].
+ * @param string $attribute Имя GET-параметра (напр. 'service_id' или 'mode').
+ */
+function dropDownList(string $title, array $list, array $currentParams, array $baseRoute, string $attribute): void
+{
+    // Определяем, какой элемент активен в данный момент
+    $activeValue = $currentParams[$attribute] ?? null;
+
+    echo Html::beginTag('th', ['class' => 'dropdown-th']);
+    echo Html::beginTag('div', ['class' => 'dropdown']);
+
+    // Кнопка
+    echo Html::tag('button',
+            $title . Html::tag('span', '', ['class' => 'caret']),
+            ['class' => 'btn btn-th btn-default dropdown-toggle', 'data-toggle' => 'dropdown']
+    );
+
+    echo Html::beginTag('ul', ['class' => 'dropdown-menu']);
+
+    // --- Ссылка "All" (Сброс фильтра) ---
+    $allParams = $currentParams;
+    unset($allParams[$attribute]); // Удаляем параметр фильтра
+    $allUrl = Url::to(array_merge($baseRoute, $allParams));
+
+    $isAllActive = is_null($activeValue) || $activeValue === '';
+
+    echo Html::tag('li', Html::a('All (N/A)', $allUrl), ['class' => ($isAllActive ? 'active' : '')]);
+
+    // --- Элементы списка ---
+    foreach ($list as $id => $data) {
+        $itemParams = array_merge($currentParams, [$attribute => $id]);
+        $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
+
+        // Определяем контент для ссылки (для Service vs Mode)
+        if (is_array($data)) { // Если это Service с amount
+             $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' ' . ($data['name'] ?? $id);
+        } else { // Если это Mode (простое имя)
+             $content = $data;
+        }
+
+        $isActive = ($activeValue == $id);
+
+        echo Html::tag('li', Html::a($content, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
+    }
+
+    echo Html::endTag('ul');
+    echo Html::endTag('div');
+    echo Html::endTag('th');
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,132 +109,147 @@ OrderPageAsset::register($this);
   </div>
 </nav>
 <div class="container-fluid">
-  <ul class="nav nav-tabs p-b">
-      <?php
+<?php
+    echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
 
-      use yii\helpers\Url;
-
-      // Получаем имя текущего контроллера (например, 'order')
-      $controllerId = Yii::$app->controller->id;
-
-      echo '<li'. (is_null($status) ? ' class="active"' : '') . '><a href="'. Url::to([$controllerId . '/index']) .'">All orders</a></li>';
-
-      foreach (Orders::getStatusList()as $key => $value) {
+        echo Html::tag('li', Html::a('All orders', Url::to([$controllerId . '/index'])), ['class' => (is_null($status) ? ' class="active"' : '')]);
+        foreach (Orders::getStatusList()as $key => $value) {
           $actionName = strtolower(str_replace(' ', '', $value));
           $url = Url::to([$controllerId . '/' . $actionName]);
-          echo '<li'. ($status === $key ? ' class="active"' : '') . '><a href="'. $url .'">'. $value . '</a></li>';
-      }
+          echo Html::tag('li', Html::a($value, $url));
+        }
 
-      ?>
-    <li class="pull-right custom-search">
-      <form class="form-inline" action="/admin/orders" method="get">
-        <div class="input-group">
-          <input type="text" name="search" class="form-control" value="" placeholder="Search orders">
-          <span class="input-group-btn search-select-wrap">
+        // Получаем текущие параметры GET для заполнения поля поиска
+        $searchQuery = Yii::$app->request->get('search', '');
+        $searchType = Yii::$app->request->get('search-type', 'id');
 
-            <select class="form-control search-select" name="search-type">
-              <option value="1" selected="">Order ID</option>
-              <option value="2">Link</option>
-              <option value="3">Username</option>
-            </select>
-            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-            </span>
-        </div>
-      </form>
-    </li>
-  </ul>
+        // Определяем список опций для выпадающего списка
+        $searchOptions = [
+              'id' => 'Order ID',
+              'link' => 'Link',
+              'user' => 'Username',
+        ];
 
-<?php
-    echo '  
-<table class="table order-table">
-    <thead>
-    <tr>
-      <th>ID</th>
-      <th>User</th>
-      <th>Link</th>
-      <th>Quantity</th>
-      <th class="dropdown-th">
-        <div class="dropdown">
-          <button class="btn btn-th btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-            Service
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li class="active"><a href="">All (894931)</a></li>
-            <li><a href=""><span class="label-id">214</span>  Real Views</a></li>
-            <li><a href=""><span class="label-id">215</span> Page Likes</a></li>
-            <li><a href=""><span class="label-id">10</span> Page Likes</a></li>
-            <li><a href=""><span class="label-id">217</span> Page Likes</a></li>
-            <li><a href=""><span class="label-id">221</span> Followers</a></li>
-            <li><a href=""><span class="label-id">224</span> Groups Join</a></li>
-            <li><a href=""><span class="label-id">230</span> Website Likes</a></li>
-          </ul>
-        </div>
-      </th>
-      <th>Status</th>
-      <th class="dropdown-th">
-        <div class="dropdown">
-          <button class="btn btn-th btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-            Mode
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li class="active"><a href="">All</a></li>
-            <li><a href="">Manual</a></li>
-            <li><a href="">Auto</a></li>
-          </ul>
-        </div>
-      </th>
-      <th>Created</th>
-    </tr>
-    </thead>
-';
+        echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
+        echo Html::beginForm($currentAction, 'get', ['class' => 'form-inline']);
+        echo Html::beginTag('div', ['class' => 'input-group']);
+        echo Html::input('text', 'search', $searchQuery, ['class' => 'form-control', 'placeholder' => 'Search orders']);
+        echo Html::beginTag('span', ['class' => 'input-group-btn search-select-wrap']);
+        echo Html::dropDownList('search-type', $searchType, $searchOptions, ['class' => 'form-control search-select']);
+        echo Html::submitButton(
+          Html::tag('span', '', ['class' => 'glyphicon glyphicon-search', 'aria-hidden' => 'true']),
+          ['class' => 'btn btn-default']);
+        echo Html::endTag('span');
+        echo Html::endTag('div');
+        echo Html::endForm();
+        echo Html::endTag('li');
 
-echo '<tbody>';
-    foreach ($orders as $order) {
+    echo Html::endTag('ul');
 
-        echo '<tr>';
-        echo '<td>' . $order->id . '</td>';
-        echo '<td>' . $order->user->last_name . '</td>';
-        echo '<td class="link">' . $order->link . '</td>';
-        echo '<td>' . $order->quantity . '</td>';
-        echo '<td class="service"><span class="label-id">' . $order->service->name . '</span></td>';
-        echo '<td>' . Orders::getStatusList()[$order->status] . '</td>';
-        echo '<td>' . Orders::getModeList()[$order->mode] . '</td>';
-        echo '<td><span class="nowrap">'. $order->created_at .'</span><span class="nowrap">' . $order->created_at . '</span></td>';
+    $exportRoute = ['export/export-csv'];
+    $exportUrl = Url::to(array_merge($exportRoute, $currentParams));
+    echo Html::tag('div', Html::a(
+        Html::tag('span', '', ['class' => 'glyphicon glyphicon-download-alt']) . ' Export CSV',
+        $exportUrl,
+        ['class' => 'btn btn-primary pull-right', 'style' => 'margin-top: -35px;']),
+        ['class' => 'clearfix']
+    );
+
+    /** Таблица */
+    echo Html::beginTag('table', ['class' => 'table order-table']);
+
+    /** Заголовок */
+    echo Html::beginTag('thead');
+    echo Html::beginTag('tr');
+
+    foreach ($columns as $column) {
+        switch ($column->type) {
+            case ColumnsHeader::COLUMN_STRING:
+                echo Html::beginTag('th');
+                echo $column->header;
+                echo Html::endTag('th');
+                break;
+            case ColumnsHeader::COLUMN_DROPDOWN:
+
+                $list = null;
+                $attribute = null;
+
+                // Определяем список и имя GET-параметра
+                $header = $column->header;
+                if ($header == Orders::getLocationServiceId()) {
+                    $attribute = 'service_id'; // GET-параметр для Service
+                    $list = ServicesRepository::getServicesForFilter();
+                } elseif ($header == Orders::getLocationMode()) {
+                    $attribute = 'mode'; // GET-параметр для Mode
+                    $list = Orders::getModeList();
+                }
+
+                // Вызываем обновлённую функцию с параметрами контекста
+                dropDownList($column->header, $list, $currentParams, $baseRoute, $attribute);
+                break;
+        };
     }
-echo '</tbody>';
-echo '</table>';
 
-echo '
-<div class="row">
-    <div class="col-sm-8">
+    echo Html::endTag('th');
+    /** Конец заголовка */
+    echo Html::endTag('thead');
 
-      <nav>
-        <ul class="pagination">
-          <li class="disabled"><a href="" aria-label="Previous">&laquo;</a></li>
-          <li class="active"><a href="">1</a></li>
-          <li><a href="">2</a></li>
-          <li><a href="">3</a></li>
-          <li><a href="">4</a></li>
-          <li><a href="">5</a></li>
-          <li><a href="">6</a></li>
-          <li><a href="">7</a></li>
-          <li><a href="">8</a></li>
-          <li><a href="">9</a></li>
-          <li><a href="">10</a></li>
-          <li><a href="" aria-label="Next">&raquo;</a></li>
-        </ul>
-      </nav>
+    /** Тело таблицы */
+    echo Html::beginTag('tbody');
+    foreach ($orders as $order) {
+        echo Html::beginTag('tr');
 
-    </div>
-';
+        foreach ($columns as $column) {
+            echo Html::beginTag('td');
+            if ($column->header == Orders::getLocationCreatedAt()) {
+                $date = (new DateTime())->setTimestamp($order[$column->header]);
+                echo Html::tag('span', $date->format('Y-m-d'), ['class' => 'nowrap']);
+                echo Html::tag('span', $date->format('H:i:s'), ['class' => 'nowrap']);
+            } else {
+                echo $order[$column->header];
+            }
+            echo Html::endTag('td');
+        }
 
-echo '
-    <div class="col-sm-4 pagination-counters">
-      1 to 100 of 3263
-    </div>
-';
+        echo Html::endTag('tr');
+    }
+
+    /** Конец тела таблицы */
+    echo Html::endTag('tbody');
+
+
+    /** Конец таблицы */
+    echo Html::endTag('table');
+
+    echo Html::beginTag('div', ['class' => 'row']);
+    echo Html::beginTag('div', ['class' => 'col-sm-8']);
+
+    /** Пагинация */
+    echo Html::beginTag('nav');
+    echo Html::beginTag('ul', ['class' => 'pagination']);
+
+    foreach ($pages as $page) {
+        $pageNumber = $page->id;
+        $pageParams = array_merge($currentParams, ['page' => $pageNumber]);
+        $url = Url::to(array_merge($baseRoute, $pageParams));
+
+        $currentPage = $currentParams['page'] ?? 1;
+        $isActive = ($pageNumber == $currentPage);
+
+        echo Html::tag('li', Html::a($page->title, $url), ['class' => ($isActive ? 'active' : '')]);
+    }
+
+    echo Html::endTag('ul');
+    echo Html::endTag('nav');
+    echo Html::endTag('div');
+
+    echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
+    echo "$rowStart to $rowEnd of $total";
+    echo Html::endTag('div');
+
+    echo Html::endTag('div');
+
+
 ?>
 
 
