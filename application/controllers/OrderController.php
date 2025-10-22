@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Orders;
 use app\repositories\OrdersRepository;
+use stdClass;
 use yii\web\Controller;
 
 class OrderController extends Controller
@@ -27,39 +28,57 @@ class OrderController extends Controller
     /**
      * Displays homepage.
      *
+     * @param null $status
      * @return string
      */
-    public function actionIndex($status = null)
+    public function actionIndex($status = null): string
     {
-        $repository = OrdersRepository::getOrders($status);
+        $orders = OrdersRepository::getOrders($status);
+        $columns = OrdersRepository::getColumns();
 
-        // Передаем провайдер во вью
+        $pages = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $page = new StdClass();
+            $page->number = $i;
+            $pages[] = $page;
+        }
+
+        $rowStart = 1;
+        $rowEnd = 100;
+        $total = 5000;
+
         return $this->render('orders', [
-            'data' => $repository,
+            'orders' => $orders,
+            'columns' => $columns,
+            'status' => $status,
+            'pages' => $pages,
+            'rowStart' => $rowStart,
+            'rowEnd' => $rowEnd,
+            'total' => $total,
         ]);
     }
 
-    public function actionPending()
+    public function actionPending(): string
     {
         return $this->actionIndex(Orders::STATUS_PENDING);
     }
 
-    public function actionProgress()
+    public function actionInProgress(): string
     {
         return $this->actionIndex(Orders::STATUS_IN_PROGRESS);
     }
 
-    public function actionCompleted()
+    public function actionCompleted(): string
     {
         return $this->actionIndex(Orders::STATUS_COMPLETED);
     }
 
-    public function actionCancelled()
+    public function actionCancelled(): string
     {
         return $this->actionIndex(Orders::STATUS_CANCELED);
     }
 
-    public function actionFail()
+    public function actionFail(): string
     {
         return $this->actionIndex(Orders::STATUS_FAIL);
     }

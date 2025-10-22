@@ -51,15 +51,55 @@ class Orders extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'ID',
-            'user_id' => 'User ID',
-            'link' => 'Link',
-            'quantity' => 'Quantity',
-            'service_id' => 'Service ID',
-            'status' => 'Status',
-            'created_at' => 'Created At',
-            'mode' => 'Mode',
+            'id' => self::getLocationId(),
+            'user_id' => self::getLocationUserId(),
+            'link' => self::getLocationLink(),
+            'quantity' => self::getLocationQuantity(),
+            'service_id' => self::getLocationServiceId(),
+            'status' => self::getLocationStatus(),
+            'created_at' => self::getLocationCreatedAt(),
+            'mode' => self::getLocationMode(),
         ];
+    }
+
+    public static function getLocationId(): string
+    {
+        return 'ID';
+    }
+
+    public static function getLocationUserId(): string
+    {
+        return 'User ID';
+    }
+
+    public static function getLocationLink(): string
+    {
+        return 'Link';
+    }
+
+    public static function getLocationQuantity(): string
+    {
+        return 'Quantity';
+    }
+
+    public static function getLocationServiceId(): string
+    {
+        return 'Service ID';
+    }
+
+    public static function getLocationStatus(): string
+    {
+        return 'Status';
+    }
+
+    public static function getLocationCreatedAt(): string
+    {
+        return 'Created At';
+    }
+
+    public static function getLocationMode(): string
+    {
+        return 'Mode';
     }
 
     public function rules(): array
@@ -91,5 +131,24 @@ class Orders extends ActiveRecord
     public function getService(): ActiveQuery
     {
         return $this->hasOne(Services::class, ['id' => 'service_id']);
+    }
+
+    public static function getStatusList(): array
+    {
+        return [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_IN_PROGRESS => 'In progress',
+            self::STATUS_COMPLETED => 'Completed',
+            self::STATUS_CANCELED => 'Cancelled',
+            self::STATUS_FAIL => 'Fail',
+        ];
+    }
+
+    public static function getModeList(): array
+    {
+        return [
+            self::MODE_MANUAL => 'Manual',
+            self::MODE_AUTO => 'Auto',
+        ];
     }
 }
