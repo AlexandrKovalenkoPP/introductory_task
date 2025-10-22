@@ -2,44 +2,12 @@
 
 namespace app\controllers;
 
-use app\repositories\Orders;
-use Yii;
-use yii\data\ActiveDataProvider;
-use yii\filters\AccessControl;
+use app\models\Orders;
+use app\repositories\OrdersRepository;
 use yii\web\Controller;
-use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 
 class OrderController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::class,
-                'only' => ['logout'],
-                'rules' => [
-                    [
-                        'actions' => ['logout'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
-            'verbs' => [
-                'class' => VerbFilter::class,
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
-        ];
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -61,50 +29,39 @@ class OrderController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($status = null)
     {
-        // Создаем провайдер данных
-        $dataProvider = new ActiveDataProvider([
-            'query' => \app\models\Orders::find(),//Order::find(), // Выбираем все записи из модели Order
-            'pagination' => [
-                'pageSize' => 20, // Устанавливаем размер страницы
-            ],
-            'sort' => [
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC, // Сортируем по дате создания по убыванию
-                ]
-            ],
-        ]);
+        $repository = OrdersRepository::getOrders($status);
 
         // Передаем провайдер во вью
         return $this->render('orders', [
-            'dataProvider' => $dataProvider,
+            'data' => $repository,
         ]);
     }
 
     public function actionPending()
     {
-        return Orders::getOrders('pending');
+        return $this->actionIndex(Orders::STATUS_PENDING);
     }
 
-    public function actionInProgress()
+    public function actionProgress()
     {
-
+        return $this->actionIndex(Orders::STATUS_IN_PROGRESS);
     }
 
     public function actionCompleted()
     {
-
+        return $this->actionIndex(Orders::STATUS_COMPLETED);
     }
 
     public function actionCancelled()
     {
-        
+        return $this->actionIndex(Orders::STATUS_CANCELED);
     }
 
-    public function actionError()
+    public function actionFail()
     {
-        
+        return $this->actionIndex(Orders::STATUS_FAIL);
     }
 
 }
