@@ -13,45 +13,60 @@ $controllerId = Yii::$app->controller->id;
 $baseRoute = [$controllerId . '/' . $currentAction];
 $currentParams = Yii::$app->request->queryParams;
 
-function dropDownList(array $list): void
+/**
+ * Генерирует HTML для выпадающего меню фильтрации.
+ * @param string $title Метка кнопки ('Service', 'Mode').
+ * @param array $list Данные для списка [id => ['name' => 'Name', 'amount' => 123]] или [id => 'Name'].
+ * @param string $attribute Имя GET-параметра (напр. 'service_id' или 'mode').
+ */
+function dropDownList(string $title, array $list, array $currentParams, array $baseRoute, string $attribute): void
 {
+    // Определяем, какой элемент активен в данный момент
+    $activeValue = $currentParams[$attribute] ?? null;
+
     echo Html::beginTag('th', ['class' => 'dropdown-th']);
     echo Html::beginTag('div', ['class' => 'dropdown']);
 
-// Кнопка
+    // Кнопка
     echo Html::tag('button',
-            'Service' . Html::tag('span', '', ['class' => 'caret']),
+            $title . Html::tag('span', '', ['class' => 'caret']),
             ['class' => 'btn btn-th btn-default dropdown-toggle', 'data-toggle' => 'dropdown']
     );
 
-// Выпадающее меню
     echo Html::beginTag('ul', ['class' => 'dropdown-menu']);
 
-// Ссылка "All"
-//    $allUrl = Url::to(array_merge($baseRoute, array_diff_key($currentParams, ['service_id' => 1])));
-    echo Html::tag('li', Html::a('All (N/A)', ''));
+    // --- Ссылка "All" (Сброс фильтра) ---
+    $allParams = $currentParams;
+    unset($allParams[$attribute]); // Удаляем параметр фильтра
+    $allUrl = Url::to(array_merge($baseRoute, $allParams));
 
-// Элементы списка
-    foreach ($list as $item) {
-//        var_dump($item); die();
-//        $serviceParams = array_merge($currentParams, ['service_id' => $serviceId]);
-//        $serviceUrl = Url::to(array_merge($baseRoute, $serviceParams));
-        $content = Html::tag('span', $item['amount'], ['class' => 'label-id']);
-        $content .= ' ' . $item['name'];
+    $isAllActive = is_null($activeValue) || $activeValue === '';
 
-        echo Html::tag('li', Html::a($content, ''));
+    echo Html::tag('li', Html::a('All (N/A)', $allUrl), ['class' => ($isAllActive ? 'active' : '')]);
+
+    // --- Элементы списка ---
+    foreach ($list as $id => $data) {
+        $itemParams = array_merge($currentParams, [$attribute => $id]);
+        $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
+
+        // Определяем контент для ссылки (для Service vs Mode)
+        if (is_array($data)) { // Если это Service с amount
+             $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' ' . ($data['name'] ?? $id);
+        } else { // Если это Mode (простое имя)
+             $content = $data;
+        }
+
+        $isActive = ($activeValue == $id);
+
+        echo Html::tag('li', Html::a($content, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
     }
 
     echo Html::endTag('ul');
     echo Html::endTag('div');
     echo Html::endTag('th');
-
 }
-
-
-
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,42 +109,43 @@ function dropDownList(array $list): void
   </div>
 </nav>
 <div class="container-fluid">
-  <ul class="nav nav-tabs p-b">
-      <?php
+<?php
+    echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
 
-
-
-      // Получаем имя текущего контроллера (например, 'order')
-      $controllerId = Yii::$app->controller->id;
-
-      echo '<li'. (is_null($status) ? ' class="active"' : '') . '><a href="'. Url::to([$controllerId . '/index']) .'">All orders</a></li>';
-
-      foreach (Orders::getStatusList()as $key => $value) {
+        echo Html::tag('li', Html::a('All orders', Url::to([$controllerId . '/index'])), ['class' => (is_null($status) ? ' class="active"' : '')]);
+        foreach (Orders::getStatusList()as $key => $value) {
           $actionName = strtolower(str_replace(' ', '', $value));
           $url = Url::to([$controllerId . '/' . $actionName]);
-          echo '<li'. ($status === $key ? ' class="active"' : '') . '><a href="'. $url .'">'. $value . '</a></li>';
-      }
+          echo Html::tag('li', Html::a($value, $url));
+        }
 
-      ?>
-    <li class="pull-right custom-search">
-      <form class="form-inline" action="/admin/orders" method="get">
-        <div class="input-group">
-          <input type="text" name="search" class="form-control" value="" placeholder="Search orders">
-          <span class="input-group-btn search-select-wrap">
+        // Получаем текущие параметры GET для заполнения поля поиска
+        $searchQuery = Yii::$app->request->get('search', '');
+        $searchType = Yii::$app->request->get('search-type', '1');
 
-            <select class="form-control search-select" name="search-type">
-              <option value="1" selected="">Order ID</option>
-              <option value="2">Link</option>
-              <option value="3">Username</option>
-            </select>
-            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
-            </span>
-        </div>
-      </form>
-    </li>
-  </ul>
+        // Определяем список опций для выпадающего списка
+        $searchOptions = [
+              '1' => 'Order ID',
+              '2' => 'Link',
+              '3' => 'Username',
+        ];
 
-<?php
+        echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
+        echo Html::beginForm($controllerId.'/'.$currentAction, 'get', ['class' => 'form-inline']);
+        echo Html::beginTag('div', ['class' => 'input-group']);
+        echo Html::input('text', 'search', $searchQuery, ['class' => 'form-control', 'placeholder' => 'Search orders']);
+        echo Html::beginTag('span', ['class' => 'input-group-btn search-select-wrap']);
+        echo Html::dropDownList('search-type', $searchType, $searchOptions, ['class' => 'form-control search-select']);
+        echo Html::submitButton(
+          Html::tag('span', '', ['class' => 'glyphicon glyphicon-search', 'aria-hidden' => 'true']),
+          ['class' => 'btn btn-default']);
+        echo Html::endTag('span');
+        echo Html::endTag('div');
+        echo Html::endForm();
+        echo Html::endTag('li');
+
+    echo Html::endTag('ul');
+
     /** Таблица */
     echo Html::beginTag('table', ['class' => 'table order-table']);
 
@@ -138,22 +154,31 @@ function dropDownList(array $list): void
     echo Html::beginTag('tr');
 
     foreach ($columns as $column) {
-        echo Html::beginTag('th');
-
         switch ($column->type) {
             case ColumnsHeader::COLUMN_STRING:
+                echo Html::beginTag('th');
                 echo $column->header;
+                echo Html::endTag('th');
                 break;
             case ColumnsHeader::COLUMN_DROPDOWN:
-                $list = match ($column->header) {
-                    Orders::getLocationServiceId() => ServicesRepository::getServicesForFilter(),
-                    Orders::getLocationMode() => Orders::getModeList()
-                };
-//                var_dump($list); die();
-                dropDownList($list);
-        };
 
-        echo Html::endTag('th');
+                $list = null;
+                $attribute = null;
+
+                // Определяем список и имя GET-параметра
+                $header = $column->header;
+                if ($header == Orders::getLocationServiceId()) {
+                    $attribute = 'service_id'; // GET-параметр для Service
+                    $list = ServicesRepository::getServicesForFilter();
+                } elseif ($header == Orders::getLocationMode()) {
+                    $attribute = 'mode'; // GET-параметр для Mode
+                    $list = Orders::getModeList();
+                }
+
+                // Вызываем обновлённую функцию с параметрами контекста
+                dropDownList($column->header, $list, $currentParams, $baseRoute, $attribute);
+                break;
+        };
     }
 
     echo Html::endTag('th');
@@ -165,9 +190,15 @@ function dropDownList(array $list): void
     foreach ($orders as $order) {
         echo Html::beginTag('tr');
 
-        foreach ($order as $column) {
+        foreach ($columns as $column) {
             echo Html::beginTag('td');
-            echo $column;
+            if ($column->header == Orders::getLocationCreatedAt()) {
+                $date = (new DateTime())->setTimestamp($order[$column->header]);
+                echo Html::tag('span', $date->format('Y-m-d'), ['class' => 'nowrap']);
+                echo Html::tag('span', $date->format('H:i:s'), ['class' => 'nowrap']);
+            } else {
+                echo $order[$column->header];
+            }
             echo Html::endTag('td');
         }
 
@@ -181,7 +212,11 @@ function dropDownList(array $list): void
     /** Конец таблицы */
     echo Html::endTag('table');
 
+    echo Html::beginTag('div', ['class' => 'row']);
+    echo Html::beginTag('div', ['class' => 'col-sm-8']);
+
     /** Пагинация */
+    echo Html::beginTag('nav');
     echo Html::beginTag('ul', ['class' => 'pagination']);
 
     foreach ($pages as $page) {
@@ -196,10 +231,15 @@ function dropDownList(array $list): void
     }
 
     echo Html::endTag('ul');
+    echo Html::endTag('nav');
+    echo Html::endTag('div');
 
     echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
     echo "$rowStart to $rowEnd of $total";
     echo Html::endTag('div');
+
+    echo Html::endTag('div');
+
 
 ?>
 

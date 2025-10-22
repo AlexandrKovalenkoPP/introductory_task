@@ -12,8 +12,9 @@ class Pagination
     public function __construct(
         protected int $amount,
         protected int $currentPage,
+        protected int $limit
     ) {
-        $this->count = $amount % 100;
+        $this->count = $amount % $limit;
         $this->getPeriod();
     }
 

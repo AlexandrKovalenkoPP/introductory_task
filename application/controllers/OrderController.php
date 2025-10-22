@@ -35,6 +35,7 @@ class OrderController extends Controller
      */
     public function actionIndex($status = null): string
     {
+        $limit = 10;
         $params = Yii::$app->request->queryParams;
 
         if ($status !== null) {
@@ -42,25 +43,20 @@ class OrderController extends Controller
         }
 
         $params['page'] = $params['page'] ?? 1;
+        $params['limit'] = $params['limit'] ?? $limit;
 
         $orders = OrdersRepository::getOrders($params);
         $columns = OrdersRepository::getColumns();
         $amount = OrdersRepository::getAmountOrders($params);
 
-        $pages = (new Pagination($amount, $params['page']))->generatePages();
-
-        $rowStart = 1;
-        $rowEnd = 100;
-        $total = $amount;
-
         return $this->render('orders', [
             'orders' => $orders,
             'columns' => $columns,
             'status' => $status,
-            'pages' => $pages,
-            'rowStart' => $rowStart,
-            'rowEnd' => $rowEnd,
-            'total' => $total,
+            'pages' => (new Pagination($amount, $params['page'], $limit))->generatePages(),
+            'rowStart' => 1,
+            'rowEnd' => $limit,
+            'total' => $amount,
         ]);
     }
 

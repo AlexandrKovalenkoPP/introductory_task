@@ -52,7 +52,7 @@ class Orders extends ActiveRecord
     {
         return [
             'id' => self::getLocationId(),
-            'user_id' => self::getLocationUserId(),
+            'user_id' => self::getLocationUser(),
             'link' => self::getLocationLink(),
             'quantity' => self::getLocationQuantity(),
             'service_id' => self::getLocationServiceId(),
@@ -67,9 +67,9 @@ class Orders extends ActiveRecord
         return 'ID';
     }
 
-    public static function getLocationUserId(): string
+    public static function getLocationUser(): string
     {
-        return 'User ID';
+        return 'User';
     }
 
     public static function getLocationLink(): string
@@ -84,7 +84,7 @@ class Orders extends ActiveRecord
 
     public static function getLocationServiceId(): string
     {
-        return 'Service ID';
+        return 'Service';
     }
 
     public static function getLocationStatus(): string
@@ -94,7 +94,7 @@ class Orders extends ActiveRecord
 
     public static function getLocationCreatedAt(): string
     {
-        return 'Created At';
+        return 'Created';
     }
 
     public static function getLocationMode(): string
