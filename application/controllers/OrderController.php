@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Orders;
 use app\repositories\OrdersRepository;
 use stdClass;
+use Yii;
 use yii\web\Controller;
 
 class OrderController extends Controller
@@ -33,7 +34,15 @@ class OrderController extends Controller
      */
     public function actionIndex($status = null): string
     {
-        $orders = OrdersRepository::getOrders($status);
+        $params = Yii::$app->request->queryParams;
+
+        if ($status !== null) {
+            $params['status'] = $status;
+        }
+
+        $params['page'] = $params['page'] ?? 1;
+
+        $orders = OrdersRepository::getOrders($params);
         $columns = OrdersRepository::getColumns();
 
         $pages = [];

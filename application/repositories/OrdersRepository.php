@@ -7,10 +7,11 @@ use app\models\Orders;
 
 class OrdersRepository
 {
-    public static function getOrders(string|null $status = null, array $params = [])
+    public static function getOrders($params = [])
     {
         $orders = Orders::find()
-            ->andFilterWhere(['status' => $status])
+            ->andFilterWhere(['status' => $params['status']])
+            ->offset(($params['page'] - 1) * 100)
             ->limit(100)
             ->all();
 

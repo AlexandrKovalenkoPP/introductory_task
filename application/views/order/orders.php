@@ -6,9 +6,12 @@ use app\models\Orders;
 use app\repositories\ServicesRepository;use yii\helpers\Html;
 use yii\helpers\Url;
 
-// Используем наш новый бандл
 OrderPageAsset::register($this);
-// ...
+
+$currentAction = Yii::$app->controller->action->id;
+$controllerId = Yii::$app->controller->id;
+$baseRoute = [$controllerId . '/' . $currentAction];
+$currentParams = Yii::$app->request->queryParams;
 
 function dropDownList(array $list): void
 {
@@ -179,19 +182,20 @@ function dropDownList(array $list): void
     echo Html::endTag('table');
 
     /** Пагинация */
-    echo Html::beginTag('div', ['class' => 'row']);
-    echo Html::beginTag('div', ['class' => 'col-sm-8']);
-    echo Html::beginTag('nav');
     echo Html::beginTag('ul', ['class' => 'pagination']);
 
     foreach ($pages as $page) {
-        echo Html::tag('li', Html::a($page->number, ''));
+        $pageNumber = $page->number;
+        $pageParams = array_merge($currentParams, ['page' => $pageNumber]);
+        $url = Url::to(array_merge($baseRoute, $pageParams));
+
+        $currentPage = $currentParams['page'] ?? 1;
+        $isActive = ($pageNumber == $currentPage);
+
+        echo Html::tag('li', Html::a($pageNumber, $url), ['class' => ($isActive ? 'active' : '')]);
     }
 
     echo Html::endTag('ul');
-    echo Html::endTag('nav');
-    echo Html::endTag('div');
-    echo Html::endTag('div');
 
     echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
     echo "$rowStart to $rowEnd of $total";
