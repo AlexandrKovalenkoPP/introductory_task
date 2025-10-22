@@ -5,7 +5,6 @@ namespace app\controllers;
 use app\Entity\Table\Pagination;
 use app\models\Orders;
 use app\repositories\OrdersRepository;
-use stdClass;
 use Yii;
 use yii\web\Controller;
 
@@ -14,7 +13,7 @@ class OrderController extends Controller
     /**
      * {@inheritdoc}
      */
-    public function actions()
+    public function actions(): array
     {
         return [
             'error' => [
@@ -45,13 +44,11 @@ class OrderController extends Controller
         $params['page'] = $params['page'] ?? 1;
         $params['limit'] = $params['limit'] ?? $limit;
 
-        $orders = OrdersRepository::getOrders($params);
-        $columns = OrdersRepository::getColumns();
         $amount = OrdersRepository::getAmountOrders($params);
 
         return $this->render('orders', [
-            'orders' => $orders,
-            'columns' => $columns,
+            'orders' => OrdersRepository::getOrders($params),
+            'columns' => OrdersRepository::getColumns(),
             'status' => $status,
             'pages' => (new Pagination($amount, $params['page'], $limit))->generatePages(),
             'rowStart' => 1,

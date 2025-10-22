@@ -31,6 +31,11 @@ class OrdersRepository
         return static::query($params)->count();
     }
 
+    public static function getExportQuery($params = [])
+    {
+        return static::query($params);
+    }
+
     /**
      * @return array
      */
@@ -62,8 +67,8 @@ class OrdersRepository
                 Orders::getLocationMode() => 'orders.mode',
             ])
             ->from('orders')
-            ->innerJoin(Services::tableName() . ' services', 'services.id = orders.service_id')
-            ->innerJoin(Users::tableName() . ' users', 'users.id = orders.user_id');
+            ->innerJoin(Services::tableName(), 'services.id = orders.service_id')
+            ->innerJoin(Users::tableName(), 'users.id = orders.user_id');
 
         if (isset($params['status'])) $query->andWhere(['orders.status' => $params['status']]);
 
@@ -71,9 +76,7 @@ class OrdersRepository
             match ($params['search-type']) {
                 'id' => $query->andWhere(['orders.id' => $params['search']]),
                 'link' => $query->andWhere(['like', 'orders.link', $params['search']]),
-                'user' => $query
-                    ->orWhere(['like', 'users.first_name', $params['search']])
-                    ->orWhere(['like', 'users.last_name', $params['search']]),
+                'user' => $query->orWhere(['like', 'concat(users.first_name, " ", users.last_name)', $params['search']]),
             };
         }
 

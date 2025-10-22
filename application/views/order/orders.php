@@ -121,17 +121,17 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
         // Получаем текущие параметры GET для заполнения поля поиска
         $searchQuery = Yii::$app->request->get('search', '');
-        $searchType = Yii::$app->request->get('search-type', '1');
+        $searchType = Yii::$app->request->get('search-type', 'id');
 
         // Определяем список опций для выпадающего списка
         $searchOptions = [
-              '1' => 'Order ID',
-              '2' => 'Link',
-              '3' => 'Username',
+              'id' => 'Order ID',
+              'link' => 'Link',
+              'user' => 'Username',
         ];
 
         echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
-        echo Html::beginForm($controllerId.'/'.$currentAction, 'get', ['class' => 'form-inline']);
+        echo Html::beginForm($currentAction, 'get', ['class' => 'form-inline']);
         echo Html::beginTag('div', ['class' => 'input-group']);
         echo Html::input('text', 'search', $searchQuery, ['class' => 'form-control', 'placeholder' => 'Search orders']);
         echo Html::beginTag('span', ['class' => 'input-group-btn search-select-wrap']);
@@ -145,6 +145,15 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
         echo Html::endTag('li');
 
     echo Html::endTag('ul');
+
+    $exportRoute = ['export/export-csv'];
+    $exportUrl = Url::to(array_merge($exportRoute, $currentParams));
+    echo Html::tag('div', Html::a(
+        Html::tag('span', '', ['class' => 'glyphicon glyphicon-download-alt']) . ' Export CSV',
+        $exportUrl,
+        ['class' => 'btn btn-primary pull-right', 'style' => 'margin-top: -35px;']),
+        ['class' => 'clearfix']
+    );
 
     /** Таблица */
     echo Html::beginTag('table', ['class' => 'table order-table']);
