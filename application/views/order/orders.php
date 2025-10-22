@@ -185,14 +185,14 @@ function dropDownList(array $list): void
     echo Html::beginTag('ul', ['class' => 'pagination']);
 
     foreach ($pages as $page) {
-        $pageNumber = $page->number;
+        $pageNumber = $page->id;
         $pageParams = array_merge($currentParams, ['page' => $pageNumber]);
         $url = Url::to(array_merge($baseRoute, $pageParams));
 
         $currentPage = $currentParams['page'] ?? 1;
         $isActive = ($pageNumber == $currentPage);
 
-        echo Html::tag('li', Html::a($pageNumber, $url), ['class' => ($isActive ? 'active' : '')]);
+        echo Html::tag('li', Html::a($page->title, $url), ['class' => ($isActive ? 'active' : '')]);
     }
 
     echo Html::endTag('ul');

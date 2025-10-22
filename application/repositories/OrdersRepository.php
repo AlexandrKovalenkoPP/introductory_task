@@ -18,6 +18,15 @@ class OrdersRepository
         return $orders;
     }
 
+    public static function getAmountOrders($params = [])
+    {
+        $orders = Orders::find()
+            ->andFilterWhere(['status' => $params['status']])
+            ->count();
+
+        return $orders;
+    }
+
     /**
      * @return array
      */

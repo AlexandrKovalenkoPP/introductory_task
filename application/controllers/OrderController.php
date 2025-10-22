@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\Entity\Table\Pagination;
 use app\models\Orders;
 use app\repositories\OrdersRepository;
 use stdClass;
@@ -44,17 +45,13 @@ class OrderController extends Controller
 
         $orders = OrdersRepository::getOrders($params);
         $columns = OrdersRepository::getColumns();
+        $amount = OrdersRepository::getAmountOrders($params);
 
-        $pages = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $page = new StdClass();
-            $page->number = $i;
-            $pages[] = $page;
-        }
+        $pages = (new Pagination($amount, $params['page']))->generatePages();
 
         $rowStart = 1;
         $rowEnd = 100;
-        $total = 5000;
+        $total = $amount;
 
         return $this->render('orders', [
             'orders' => $orders,
