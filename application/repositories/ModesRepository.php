@@ -2,8 +2,7 @@
 
 namespace app\repositories;
 
-use app\models\Orders;
-use yii\helpers\Html;
+use app\modules\order\models\Orders;
 
 class ModesRepository
 {

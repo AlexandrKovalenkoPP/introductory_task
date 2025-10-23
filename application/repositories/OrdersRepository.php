@@ -3,9 +3,9 @@
 namespace app\repositories;
 
 use app\Entity\Table\ColumnsHeader;
-use app\models\Orders;
-use app\models\Services;
-use app\models\Users;
+use app\modules\order\models\Orders;
+use app\modules\order\models\Services;
+use app\modules\order\models\Users;
 use yii\db\Query;
 
 class OrdersRepository

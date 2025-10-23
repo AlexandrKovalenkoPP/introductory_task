@@ -2,8 +2,9 @@
 // ...
 use app\assets\OrderPageAsset;
 use app\Entity\Table\ColumnsHeader;
-use app\models\Orders;
-use app\repositories\ServicesRepository;use yii\helpers\Html;
+use app\modules\order\models\Orders;
+use app\repositories\ServicesRepository;
+use yii\helpers\Html;
 use yii\helpers\Url;
 
 OrderPageAsset::register($this);
@@ -51,7 +52,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
         // Определяем контент для ссылки (для Service vs Mode)
         if (is_array($data)) { // Если это Service с amount
-             $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' ' . ($data['name'] ?? $id);
+             $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' orders.php' . ($data['name'] ?? $id);
         } else { // Если это Mode (простое имя)
              $content = $data;
         }

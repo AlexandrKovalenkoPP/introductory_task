@@ -2,8 +2,8 @@
 
 namespace app\repositories;
 
-use app\models\Orders;
-use app\models\Services;
+use app\modules\order\models\Orders;
+use app\modules\order\models\Services;
 use yii\db\Query;
 use yii\helpers\Html;
 

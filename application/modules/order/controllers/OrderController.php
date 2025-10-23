@@ -1,9 +1,9 @@
 <?php
 
-namespace app\controllers;
+namespace app\modules\order\controllers;
 
 use app\Entity\Table\Pagination;
-use app\models\Orders;
+use app\modules\order\models\Orders;
 use app\repositories\OrdersRepository;
 use Yii;
 use yii\web\Controller;
