@@ -1,9 +1,15 @@
 <?php
-// ...
+
+/**
+ * @var stdClass $result
+ * @var $status
+ * @var Pagination $pages
+ */
+
 use app\assets\OrderPageAsset;
-use app\Entity\Table\ColumnsHeader;
+use app\components\Table\ColumnsHeader;
 use app\modules\order\models\Orders;
-use app\repositories\ServicesRepository;
+use yii\data\Pagination;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
@@ -14,6 +20,22 @@ $currentAction = Yii::$app->controller->action->id;
 $controllerId = Yii::$app->controller->id;
 $baseRoute = [$controllerId . '/' . $currentAction];
 $currentParams = Yii::$app->request->queryParams;
+
+/**
+ * Добавляем очистку данных в GET
+ */
+$this->registerJs(<<<JS
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('#search-form');
+  if (!form) return;
+
+  form.addEventListener('submit', () => {
+    form.querySelectorAll('input[name], select[name]').forEach(el => {
+      if (el.value.trim() === '') el.removeAttribute('name');
+    });
+  });
+});
+JS);
 
 /**
  * Генерирует HTML для выпадающего меню фильтрации.
@@ -119,7 +141,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
         }
 
         $searchQuery = Yii::$app->request->get('search', '');
-        $searchType = Yii::$app->request->get('search-type', 'id');
+        $searchType = Yii::$app->request->get('searchType', 'id');
 
         $searchOptions = [
             'id' => 'Order ID',
@@ -128,11 +150,11 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
         ];
 
         echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
-        echo Html::beginForm($currentAction, 'get', ['class' => 'form-inline']);
+        echo Html::beginForm($baseRoute, 'get', ['class' => 'form-inline', 'id' => 'search-form']);
         echo Html::beginTag('div', ['class' => 'input-group']);
         echo Html::input('text', 'search', $searchQuery, ['class' => 'form-control', 'placeholder' => 'Search orders']);
         echo Html::beginTag('span', ['class' => 'input-group-btn search-select-wrap']);
-        echo Html::dropDownList('search-type', $searchType, $searchOptions, ['class' => 'form-control search-select']);
+        echo Html::dropDownList('searchType', $searchType, $searchOptions, ['class' => 'form-control search-select']);
         echo Html::submitButton(
           Html::tag('span', '', ['class' => 'glyphicon glyphicon-search', 'aria-hidden' => 'true']),
           ['class' => 'btn btn-default']);
@@ -159,7 +181,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
     echo Html::beginTag('thead');
     echo Html::beginTag('tr');
 
-    foreach ($columns as $column) {
+    foreach ($result->columns as $column) {
         switch ($column->type) {
             case ColumnsHeader::COLUMN_STRING:
                 echo Html::beginTag('th');
@@ -175,10 +197,10 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
                 $header = $column->header;
                 if ($header == Orders::getLocationServiceId()) {
                     $attribute = 'service_id'; // GET-параметр для Service
-                    $list = ServicesRepository::getServicesForFilter();
+                    $list = $result->serviceList;
                 } elseif ($header == Orders::getLocationMode()) {
                     $attribute = 'mode'; // GET-параметр для Mode
-                    $list = Orders::getModeList();
+                    $list = $result->modeList;
                 }
 
                 // Вызываем обновлённую функцию с параметрами контекста
@@ -193,10 +215,10 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
     /** Тело таблицы */
     echo Html::beginTag('tbody');
-    foreach ($orders as $order) {
+    foreach ($result->data as $order) {
         echo Html::beginTag('tr');
 
-        foreach ($columns as $column) {
+        foreach ($result->columns as $column) {
             echo Html::beginTag('td');
             if ($column->header == Orders::getLocationCreatedAt()) {
                 $date = (new DateTime())->setTimestamp($order[$column->header]);
@@ -232,7 +254,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
     echo Html::endTag('div');
 
     echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
-    echo "$rowStart to $rowEnd of $total";
+    echo "{$result->footer->start} to {$result->footer->end} of $result->total";
     echo Html::endTag('div');
 
     echo Html::endTag('div');

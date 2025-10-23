@@ -2,10 +2,10 @@
 
 namespace app\modules\order\controllers;
 
-use app\Entity\Table\Pagination;
 use app\modules\order\models\Orders;
 use app\repositories\OrdersRepository;
 use Yii;
+use yii\data\Pagination;
 use yii\web\Controller;
 
 class TableController extends Controller
@@ -34,7 +34,6 @@ class TableController extends Controller
      */
     public function actionIndex($statusSlug = null): string
     {
-        $limit = 10;
         $params = Yii::$app->request->queryParams;
         $statusId = null;
 
@@ -51,20 +50,13 @@ class TableController extends Controller
         $params['status'] = $statusId;
 
         $params['page'] = $params['page'] ?? 1;
-        $params['limit'] = $params['limit'] ?? $limit;
 
-        $amount = OrdersRepository::getAmountOrders($params);
-
-        $pages = new \yii\data\Pagination(['totalCount' => $amount]);
+        $result = (new OrdersRepository())->setParams($params)->query()->result();
 
         return $this->render('orders', [
-            'orders' => OrdersRepository::getOrders($params),
-            'columns' => OrdersRepository::getColumns(),
+            'result' => $result,
             'status' => $statusSlug,
-            'pages' => $pages,
-            'rowStart' => 1,
-            'rowEnd' => $limit,
-            'total' => $amount,
+            'pages' => new Pagination(['totalCount' => $result->total]),
         ]);
     }
 

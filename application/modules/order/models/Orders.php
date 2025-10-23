@@ -2,6 +2,7 @@
 
 namespace app\modules\order\models;
 
+use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -62,44 +63,47 @@ class Orders extends ActiveRecord
         ];
     }
 
+    /**
+     * @return string
+     */
     public static function getLocationId(): string
     {
-        return 'ID';
+        return Yii::t('order-module', 'ID');
     }
 
     public static function getLocationUser(): string
     {
-        return 'User';
+        return Yii::t('order-module', 'User');
     }
 
     public static function getLocationLink(): string
     {
-        return 'Link';
+        return Yii::t('order-module', 'Link');
     }
 
     public static function getLocationQuantity(): string
     {
-        return 'Quantity';
+        return Yii::t('order-module', 'Quantity');
     }
 
     public static function getLocationServiceId(): string
     {
-        return 'Service';
+        return Yii::t('order-module', 'Service');
     }
 
     public static function getLocationStatus(): string
     {
-        return 'Status';
+        return Yii::t('order-module', 'Status');
     }
 
     public static function getLocationCreatedAt(): string
     {
-        return 'Created';
+        return Yii::t('order-module', 'Created');
     }
 
     public static function getLocationMode(): string
     {
-        return 'Mode';
+        return Yii::t('order-module', 'Mode');
     }
 
     public function rules(): array

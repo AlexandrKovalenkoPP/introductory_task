@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Entity\Table;
+namespace app\components\Table;
 
 class ColumnsHeader
 {
