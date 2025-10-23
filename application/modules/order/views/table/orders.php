@@ -22,13 +22,11 @@ $currentParams = Yii::$app->request->queryParams;
  */
 function dropDownList(string $title, array $list, array $currentParams, array $baseRoute, string $attribute): void
 {
-    // Определяем, какой элемент активен в данный момент
     $activeValue = $currentParams[$attribute] ?? null;
 
     echo Html::beginTag('th', ['class' => 'dropdown-th']);
     echo Html::beginTag('div', ['class' => 'dropdown']);
 
-    // Кнопка
     echo Html::tag('button',
             $title . Html::tag('span', '', ['class' => 'caret']),
             ['class' => 'btn btn-th btn-default dropdown-toggle', 'data-toggle' => 'dropdown']
@@ -36,24 +34,23 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
     echo Html::beginTag('ul', ['class' => 'dropdown-menu']);
 
-    // --- Ссылка "All" (Сброс фильтра) ---
     $allParams = $currentParams;
-    unset($allParams[$attribute]); // Удаляем параметр фильтра
+    unset($allParams[$attribute]);
+    $allParams = array_filter($allParams, function($value) { return $value !== null && $value !== ''; });
+    unset($allParams['page']);
     $allUrl = Url::to(array_merge($baseRoute, $allParams));
 
     $isAllActive = is_null($activeValue) || $activeValue === '';
 
     echo Html::tag('li', Html::a('All (N/A)', $allUrl), ['class' => ($isAllActive ? 'active' : '')]);
 
-    // --- Элементы списка ---
     foreach ($list as $id => $data) {
         $itemParams = array_merge($currentParams, [$attribute => $id]);
         $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
 
-        // Определяем контент для ссылки (для Service vs Mode)
-        if (is_array($data)) { // Если это Service с amount
+        if (is_array($data)) {
              $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' orders.php' . ($data['name'] ?? $id);
-        } else { // Если это Mode (простое имя)
+        } else {
              $content = $data;
         }
 
@@ -113,22 +110,20 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 <?php
     echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
 
-        echo Html::tag('li', Html::a('All orders', Url::to([$controllerId . '/index'])), ['class' => (is_null($status) ? ' class="active"' : '')]);
+        echo Html::tag('li', Html::a('All orders', Url::to([$controllerId.'/index'])), ['class' => (is_null($status) ? 'active' : '')]);
         foreach (Orders::getStatusList()as $key => $value) {
-          $actionName = strtolower(str_replace(' ', '', $value));
-          $url = Url::to([$controllerId . '/' . $actionName]);
-          echo Html::tag('li', Html::a($value, $url));
+            $slug = strtolower(str_replace(' ', '', $value));
+            $url = Url::to(["$controllerId/$slug"]);
+            echo Html::tag('li', Html::a($value, $url), ['class' => ($status == $key ? 'active' : '')]);
         }
 
-        // Получаем текущие параметры GET для заполнения поля поиска
         $searchQuery = Yii::$app->request->get('search', '');
         $searchType = Yii::$app->request->get('search-type', 'id');
 
-        // Определяем список опций для выпадающего списка
         $searchOptions = [
-              'id' => 'Order ID',
-              'link' => 'Link',
-              'user' => 'Username',
+            'id' => 'Order ID',
+            'link' => 'Link',
+            'user' => 'Username',
         ];
 
         echo Html::beginTag('li', ['class' => 'pull-right custom-search']);

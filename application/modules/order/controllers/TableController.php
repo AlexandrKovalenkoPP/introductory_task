@@ -8,7 +8,7 @@ use app\repositories\OrdersRepository;
 use Yii;
 use yii\web\Controller;
 
-class OrderController extends Controller
+class TableController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -32,14 +32,23 @@ class OrderController extends Controller
      * @param null $status
      * @return string
      */
-    public function actionIndex($status = null): string
+    public function actionIndex($statusSlug = null): string
     {
         $limit = 10;
         $params = Yii::$app->request->queryParams;
+        $statusId = null;
 
-        if ($status !== null) {
-            $params['status'] = $status;
+        if ($statusSlug) {
+            $statusList = Orders::getStatusList();
+
+            $statusMap = array_flip(array_map(function($name) {
+                return strtolower(str_replace(' ', '', $name));
+            }, $statusList));
+
+            $statusId = $statusMap[$statusSlug] ?? null;
         }
+
+        $params['status'] = $statusId;
 
         $params['page'] = $params['page'] ?? 1;
         $params['limit'] = $params['limit'] ?? $limit;
@@ -49,37 +58,12 @@ class OrderController extends Controller
         return $this->render('orders', [
             'orders' => OrdersRepository::getOrders($params),
             'columns' => OrdersRepository::getColumns(),
-            'status' => $status,
+            'status' => $statusSlug,
             'pages' => (new Pagination($amount, $params['page'], $limit))->generatePages(),
             'rowStart' => 1,
             'rowEnd' => $limit,
             'total' => $amount,
         ]);
-    }
-
-    public function actionPending(): string
-    {
-        return $this->actionIndex(Orders::STATUS_PENDING);
-    }
-
-    public function actionInProgress(): string
-    {
-        return $this->actionIndex(Orders::STATUS_IN_PROGRESS);
-    }
-
-    public function actionCompleted(): string
-    {
-        return $this->actionIndex(Orders::STATUS_COMPLETED);
-    }
-
-    public function actionCancelled(): string
-    {
-        return $this->actionIndex(Orders::STATUS_CANCELED);
-    }
-
-    public function actionFail(): string
-    {
-        return $this->actionIndex(Orders::STATUS_FAIL);
     }
 
 }
