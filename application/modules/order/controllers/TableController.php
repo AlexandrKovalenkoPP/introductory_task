@@ -55,11 +55,13 @@ class TableController extends Controller
 
         $amount = OrdersRepository::getAmountOrders($params);
 
+        $pages = new \yii\data\Pagination(['totalCount' => $amount]);
+
         return $this->render('orders', [
             'orders' => OrdersRepository::getOrders($params),
             'columns' => OrdersRepository::getColumns(),
             'status' => $statusSlug,
-            'pages' => (new Pagination($amount, $params['page'], $limit))->generatePages(),
+            'pages' => $pages,
             'rowStart' => 1,
             'rowEnd' => $limit,
             'total' => $amount,

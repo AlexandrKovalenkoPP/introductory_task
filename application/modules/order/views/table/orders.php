@@ -6,6 +6,7 @@ use app\modules\order\models\Orders;
 use app\repositories\ServicesRepository;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\LinkPager;
 
 OrderPageAsset::register($this);
 
@@ -224,16 +225,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
     echo Html::beginTag('nav');
     echo Html::beginTag('ul', ['class' => 'pagination']);
 
-    foreach ($pages as $page) {
-        $pageNumber = $page->id;
-        $pageParams = array_merge($currentParams, ['page' => $pageNumber]);
-        $url = Url::to(array_merge($baseRoute, $pageParams));
-
-        $currentPage = $currentParams['page'] ?? 1;
-        $isActive = ($pageNumber == $currentPage);
-
-        echo Html::tag('li', Html::a($page->title, $url), ['class' => ($isActive ? 'active' : '')]);
-    }
+    echo LinkPager::widget(['pagination' => $pages]);
 
     echo Html::endTag('ul');
     echo Html::endTag('nav');
