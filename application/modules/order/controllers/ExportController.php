@@ -3,7 +3,7 @@
 namespace app\modules\order\controllers;
 
 use app\modules\order\models\Orders;
-use app\repositories\OrdersRepository;
+use app\modules\order\repositories\OrdersRepository;
 use Yii;
 use yii\web\Controller;
 

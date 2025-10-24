@@ -9,6 +9,7 @@
 use app\assets\OrderPageAsset;
 use app\components\Table\ColumnsHeader;
 use app\modules\order\models\Orders;
+use app\modules\order\Module;
 use yii\data\Pagination;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -65,21 +66,11 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
     $isAllActive = is_null($activeValue) || $activeValue === '';
 
-    echo Html::tag('li', Html::a('All (N/A)', $allUrl), ['class' => ($isAllActive ? 'active' : '')]);
-
     foreach ($list as $id => $data) {
-        $itemParams = array_merge($currentParams, [$attribute => $id]);
+        $itemParams = array_merge($currentParams, [$attribute => $data->id]);
         $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
-
-        if (is_array($data)) {
-             $content = Html::tag('span', $data['amount'] ?? $id, ['class' => 'label-id']) . ' orders.php' . ($data['name'] ?? $id);
-        } else {
-             $content = $data;
-        }
-
         $isActive = ($activeValue == $id);
-
-        echo Html::tag('li', Html::a($content, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
+        echo Html::tag('li', Html::a($data->tag, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
     }
 
     echo Html::endTag('ul');
@@ -133,11 +124,15 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 <?php
     echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
 
-        echo Html::tag('li', Html::a('All orders', Url::to([$controllerId.'/index'])), ['class' => (is_null($status) ? 'active' : '')]);
+        echo Html::tag('li', Html::a(Yii::t(Module::I18N_CATEGORY, 'All orders'), Url::to([$controllerId.'/index'])), ['class' => (is_null($status) ? 'active' : '')]);
         foreach (Orders::getStatusList()as $key => $value) {
             $slug = strtolower(str_replace(' ', '', $value));
             $url = Url::to(["$controllerId/$slug"]);
-            echo Html::tag('li', Html::a($value, $url), ['class' => ($status == $key ? 'active' : '')]);
+            echo Html::tag(
+                    'li',
+                    Html::a(Yii::t(Module::I18N_CATEGORY, $value), $url),
+                    ['class' => ($status == $key ? 'active' : '')]
+            );
         }
 
         $searchQuery = Yii::$app->request->get('search', '');
@@ -189,22 +184,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
                 echo Html::endTag('th');
                 break;
             case ColumnsHeader::COLUMN_DROPDOWN:
-
-                $list = null;
-                $attribute = null;
-
-                // Определяем список и имя GET-параметра
-                $header = $column->header;
-                if ($header == Orders::getLocationServiceId()) {
-                    $attribute = 'service_id'; // GET-параметр для Service
-                    $list = $result->serviceList;
-                } elseif ($header == Orders::getLocationMode()) {
-                    $attribute = 'mode'; // GET-параметр для Mode
-                    $list = $result->modeList;
-                }
-
-                // Вызываем обновлённую функцию с параметрами контекста
-                dropDownList($column->header, $list, $currentParams, $baseRoute, $attribute);
+                dropDownList($column->header, $column->list, $currentParams, $baseRoute, $column->key);
                 break;
         };
     }
@@ -220,12 +200,12 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
         foreach ($result->columns as $column) {
             echo Html::beginTag('td');
-            if ($column->header == Orders::getLocationCreatedAt()) {
-                $date = (new DateTime())->setTimestamp($order[$column->header]);
+            if ($column->key == 'created') {
+                $date = (new DateTime())->setTimestamp($order[$column->key]);
                 echo Html::tag('span', $date->format('Y-m-d'), ['class' => 'nowrap']);
                 echo Html::tag('span', $date->format('H:i:s'), ['class' => 'nowrap']);
             } else {
-                echo $order[$column->header];
+                echo $order[$column->key];
             }
             echo Html::endTag('td');
         }
@@ -254,7 +234,15 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
     echo Html::endTag('div');
 
     echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
-    echo "{$result->footer->start} to {$result->footer->end} of $result->total";
+    echo Yii::t(
+            'order-module',
+            '{start} to {end} of {total}',
+            [
+                'start' => $result->footer->start,
+                'end' => $result->footer->end,
+                'total' => $result->total
+            ]
+    );
     echo Html::endTag('div');
 
     echo Html::endTag('div');

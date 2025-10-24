@@ -3,8 +3,8 @@
 return [
     'Orders' => 'Orders',
     'All orders' => 'All orders',
-    'Pending' => 'В ожидании',
-    'In Progress' => 'В процессе',
+    'Pending' => 'Pending',
+    'In progress' => 'In progress',
     'Completed' => 'Completed',
     'Cancelled' => 'Cancelled',
     'Fail' => 'Fail',
@@ -19,4 +19,7 @@ return [
     'Mode' => 'Mode',
     'Created' => 'Created',
     '{start} to {end} of {total}' => '{start} to {end} of {total}',
+    'All' => 'All',
+    'Manual' => 'Manual',
+    'Auto' => 'Auto',
 ];

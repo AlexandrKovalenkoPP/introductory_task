@@ -3,7 +3,7 @@
 namespace app\modules\order\controllers;
 
 use app\modules\order\models\Orders;
-use app\repositories\OrdersRepository;
+use app\modules\order\repositories\OrdersRepository;
 use Yii;
 use yii\data\Pagination;
 use yii\web\Controller;
@@ -34,6 +34,7 @@ class TableController extends Controller
      */
     public function actionIndex($statusSlug = null): string
     {
+        Yii::$app->language = 'ru-RU';
         $params = Yii::$app->request->queryParams;
         $statusId = null;
 
@@ -50,7 +51,6 @@ class TableController extends Controller
         $params['status'] = $statusId;
 
         $params['page'] = $params['page'] ?? 1;
-
         $result = (new OrdersRepository())->setParams($params)->query()->result();
 
         return $this->render('orders', [

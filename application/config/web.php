@@ -81,7 +81,7 @@ $config = [
                 ],
             ],
         ],
-        'language' => 'ru-RU',
+        'language' => 'ru',
 //        'language' => 'en-US',
     ],
     'params' => $params,

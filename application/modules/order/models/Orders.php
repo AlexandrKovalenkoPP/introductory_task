@@ -2,6 +2,7 @@
 
 namespace app\modules\order\models;
 
+use app\components\Translate\Translate;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -52,58 +53,15 @@ class Orders extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => self::getLocationId(),
-            'user_id' => self::getLocationUser(),
-            'link' => self::getLocationLink(),
-            'quantity' => self::getLocationQuantity(),
-            'service_id' => self::getLocationServiceId(),
-            'status' => self::getLocationStatus(),
-            'created_at' => self::getLocationCreatedAt(),
-            'mode' => self::getLocationMode(),
+            'id' => 'Id',
+            'user_id' => 'User',
+            'link' => 'Link',
+            'quantity' => 'Quantity',
+            'service_id' => 'Service',
+            'status' => 'Status',
+            'created_at' => 'Created',
+            'mode' => 'Mode',
         ];
-    }
-
-    /**
-     * @return string
-     */
-    public static function getLocationId(): string
-    {
-        return Yii::t('order-module', 'ID');
-    }
-
-    public static function getLocationUser(): string
-    {
-        return Yii::t('order-module', 'User');
-    }
-
-    public static function getLocationLink(): string
-    {
-        return Yii::t('order-module', 'Link');
-    }
-
-    public static function getLocationQuantity(): string
-    {
-        return Yii::t('order-module', 'Quantity');
-    }
-
-    public static function getLocationServiceId(): string
-    {
-        return Yii::t('order-module', 'Service');
-    }
-
-    public static function getLocationStatus(): string
-    {
-        return Yii::t('order-module', 'Status');
-    }
-
-    public static function getLocationCreatedAt(): string
-    {
-        return Yii::t('order-module', 'Created');
-    }
-
-    public static function getLocationMode(): string
-    {
-        return Yii::t('order-module', 'Mode');
     }
 
     public function rules(): array

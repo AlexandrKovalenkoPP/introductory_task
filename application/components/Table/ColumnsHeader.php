@@ -2,6 +2,8 @@
 
 namespace app\components\Table;
 
+use Yii;
+
 class ColumnsHeader
 {
     const int COLUMN_STRING = 0;
@@ -10,19 +12,33 @@ class ColumnsHeader
     /** @var string $header Название колонки */
     public string $header;
 
+    /** @var string $key Ключ колонки */
+    public string $key;
+
     /** @var int $type Тип колонки */
     public int $type;
 
+    public array|null $list = null;
+
+    public string $category;
+
     /**
-     * @param string $header
+     * @param string $key
+     * @param string $category
      * @param int $type
+     * @param array|null $list
      */
     public function __construct(
-        string $header,
+        string $key,
+        string $category,
         int $type,
+        array|null $list = null,
     )
     {
-        $this->header = $header;
+        $this->key = $key;
+        $this->category = $category;
+        $this->header = Yii::t($category, ucfirst($key));
         $this->type = $type;
+        $this->list = $list;
     }
 }

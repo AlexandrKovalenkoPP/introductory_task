@@ -1,12 +1,14 @@
 <?php
 
-namespace app\repositories;
+namespace app\modules\order\repositories;
 
 use app\components\Table\ColumnsHeader;
 use app\modules\order\models\Orders;
 use app\modules\order\models\Services;
 use app\modules\order\models\Users;
+use app\modules\order\Module;
 use stdClass;
+use Yii;
 use yii\db\Query;
 
 /**
@@ -54,8 +56,6 @@ class OrdersRepository
         $result->footer = new stdClass();
         $result->footer->start = 1;
         $result->footer->end = $this->limit;
-        $result->serviceList = ServicesRepository::getServicesForFilter();
-        $result->modeList = Orders::getModeList();
 
         return $result;
     }
@@ -69,14 +69,14 @@ class OrdersRepository
     {
         $this->query = (new Query())
             ->select([
-                Orders::getLocationId() => 'orders.id',
-                Orders::getLocationUser() => 'concat(users.first_name, " ", users.last_name)',
-                Orders::getLocationLink() => 'orders.link',
-                Orders::getLocationQuantity() => 'orders.quantity',
-                Orders::getLocationServiceId() => 'services.name',
-                Orders::getLocationStatus() => 'orders.status',
-                Orders::getLocationCreatedAt() => "orders.created_at",
-                Orders::getLocationMode() => 'orders.mode',
+                'id' => 'orders.id',
+                'user' => 'concat(users.first_name, " ", users.last_name)',
+                'link' => 'orders.link',
+                'quantity' => 'orders.quantity',
+                'service' => 'services.name',
+                'status' => 'orders.status',
+                'created' => "orders.created_at",
+                'mode' => 'orders.mode',
             ])
             ->from(Orders::tableName())
             ->innerJoin(Services::tableName(), 'services.id = orders.service_id')
@@ -92,7 +92,7 @@ class OrdersRepository
             };
         }
 
-        if (isset($this->params->service_id)) $this->query->andWhere(['services.id' => $this->params->service_id]);
+        if (isset($this->params->service)) $this->query->andWhere(['services.id' => $this->params->service]);
         if (isset($this->params->mode)) $this->query->andWhere(['orders.mode' => $this->params->mode]);
 
         return $this;
@@ -113,8 +113,8 @@ class OrdersRepository
             ->all();
 
         foreach ($orders as $key => $value) {
-            $orders[$key][Orders::getLocationStatus()] = Orders::getStatusList()[$value[Orders::getLocationStatus()]];
-            $orders[$key][Orders::getLocationMode()] = Orders::getModeList()[$value[Orders::getLocationMode()]];
+            $orders[$key]['status'] = Yii::t(Module::I18N_CATEGORY, Orders::getStatusList()[$value['status']]);
+            $orders[$key]['mode'] = Yii::t(Module::I18N_CATEGORY, Orders::getModeList()[$value['mode']]);
 
         }
 
@@ -149,14 +149,22 @@ class OrdersRepository
     public function getColumns(): array
     {
         return [
-            new ColumnsHeader(Orders::getLocationId(), ColumnsHeader::COLUMN_STRING),
-            new ColumnsHeader(Orders::getLocationUser(), ColumnsHeader::COLUMN_STRING),
-            new ColumnsHeader(Orders::getLocationLink(), ColumnsHeader::COLUMN_STRING),
-            new ColumnsHeader(Orders::getLocationQuantity(), ColumnsHeader::COLUMN_STRING),
-            new ColumnsHeader(Orders::getLocationServiceId(), ColumnsHeader::COLUMN_DROPDOWN),
-            new ColumnsHeader(Orders::getLocationStatus(), ColumnsHeader::COLUMN_STRING),
-            new ColumnsHeader(Orders::getLocationMode(), ColumnsHeader::COLUMN_DROPDOWN),
-            new ColumnsHeader(Orders::getLocationCreatedAt(), ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('id', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('user', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('link', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('quantity', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('service',
+                Module::I18N_CATEGORY,
+                ColumnsHeader::COLUMN_DROPDOWN,
+                ServicesRepository::getServicesForFilter()
+            ),
+            new ColumnsHeader('status', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
+            new ColumnsHeader('mode',
+                Module::I18N_CATEGORY,
+                ColumnsHeader::COLUMN_DROPDOWN,
+                ModesRepository::getModesForFilter()
+            ),
+            new ColumnsHeader('created', Module::I18N_CATEGORY, ColumnsHeader::COLUMN_STRING),
         ];
     }
 
