@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'Orders' => 'Заказы',
+    'All orders' => 'Все заказы',
+    'Pending' => 'В ожидании',
+    'In progress' => 'В процессе',
+    'Completed' => 'Выполнен',
+    'Cancelled' => 'Выполнен',
+    'Fail' => 'Ошибка',
+    'Export CSV' => 'Экспорт CSV',
+    'Search' => 'Поиск',
+    'Id' => 'ID',
+    'User' => 'Пользователь',
+    'Link' => 'Ссылка',
+    'Quantity' => 'Количество',
+    'Service' => 'Сервис',
+    'Status' => 'Статус',
+    'Mode' => 'Мод',
+    'Created' => 'Создан',
+    '{start} to {end} of {total}' => '{start} до {end} из {total}',
+    'All' => 'Все',
+    'Manual' => 'Ручной',
+    'Auto' => 'Автоматический',
+];

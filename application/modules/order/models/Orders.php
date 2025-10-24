@@ -1,7 +1,9 @@
 <?php
 
-namespace app\models;
+namespace app\modules\order\models;
 
+use app\components\Translate\Translate;
+use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -51,55 +53,15 @@ class Orders extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => self::getLocationId(),
-            'user_id' => self::getLocationUser(),
-            'link' => self::getLocationLink(),
-            'quantity' => self::getLocationQuantity(),
-            'service_id' => self::getLocationServiceId(),
-            'status' => self::getLocationStatus(),
-            'created_at' => self::getLocationCreatedAt(),
-            'mode' => self::getLocationMode(),
+            'id' => 'Id',
+            'user_id' => 'User',
+            'link' => 'Link',
+            'quantity' => 'Quantity',
+            'service_id' => 'Service',
+            'status' => 'Status',
+            'created_at' => 'Created',
+            'mode' => 'Mode',
         ];
-    }
-
-    public static function getLocationId(): string
-    {
-        return 'ID';
-    }
-
-    public static function getLocationUser(): string
-    {
-        return 'User';
-    }
-
-    public static function getLocationLink(): string
-    {
-        return 'Link';
-    }
-
-    public static function getLocationQuantity(): string
-    {
-        return 'Quantity';
-    }
-
-    public static function getLocationServiceId(): string
-    {
-        return 'Service';
-    }
-
-    public static function getLocationStatus(): string
-    {
-        return 'Status';
-    }
-
-    public static function getLocationCreatedAt(): string
-    {
-        return 'Created';
-    }
-
-    public static function getLocationMode(): string
-    {
-        return 'Mode';
     }
 
     public function rules(): array

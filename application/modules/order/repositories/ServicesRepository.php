@@ -1,9 +1,9 @@
 <?php
 
-namespace app\repositories;
+namespace app\modules\order\repositories;
 
-use app\models\Orders;
-use app\models\Services;
+use app\modules\order\models\Orders;
+use app\modules\order\models\Services;
 use yii\db\Query;
 use yii\helpers\Html;
 
@@ -26,13 +26,22 @@ class ServicesRepository
             ->orderBy('amount desc')
             ->all();
 
+//        var_dump($data);
         $allCount = array_reduce($data, function ($carry, $item) {
             return $carry + $item['amount'];
         });
-        $list[] = Html::tag('span', $allCount, ['class' => 'label-id']) . ' All';
+
+        $list[] = (object) [
+            'id' => null,
+            'tag' => Html::tag('span', $allCount, ['class' => 'label-id']) . ' All',
+        ];
         foreach ($data as $item) {
-            $list[] = Html::tag('span', $item['amount'], ['class' => 'label-id']) . ' ' . $item['name'];
+            $list[] = (object) [
+                'id' => $item['id'],
+                'tag' => Html::tag('span', $item['amount'], ['class' => 'label-id']) . ' ' . $item['name']
+            ];
         }
+//        var_dump($list); die();
 
         return $list;
     }

@@ -11,6 +11,11 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'modules' => [
+        'order' => [
+            'class' => 'app\modules\order\Module',
+        ]
+    ],
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
@@ -46,8 +51,38 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                [
+                    'pattern' => 'order/table/<statusSlug>',
+                    'route' => 'order/table/index',
+                    'defaults' => ['statusSlug' => ''],
+                ],
+                'order/table' => 'order/table/index',
+                'order' => 'order/table/index',
+            ]
+        ],
+        'i18n' => [
+            'translations' => [
+                'app*' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@app/messages',
+                    'sourceLanguage' => 'en-US',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                        'app/error' => 'error.php',
+                    ],
+                ],
+                'order-module' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@app/modules/order/messages',
+                    'sourceLanguage' => 'en-US',
+                    'fileMap' => [
+                        'order-module' => 'module.php',
+                    ],
+                ],
             ],
         ],
+        'language' => 'ru',
+//        'language' => 'en-US',
     ],
     'params' => $params,
 ];

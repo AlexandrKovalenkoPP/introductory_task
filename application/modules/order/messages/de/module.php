@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'Orders' => 'Bestellungen',
+    'All orders' => 'Alle Bestellungen',
+    'Pending' => 'Ausstehend',
+    'In progress' => 'In Bearbeitung',
+    'Completed' => 'Abgeschlossen',
+    'Cancelled' => 'Storniert',
+    'Fail' => 'Fehlgeschlagen',
+    'Export CSV' => 'CSV exportieren',
+    'Search' => 'Suchen',
+    'ID' => 'Dast ID',
+    'User' => 'Benutzer',
+    'Link' => 'Link',
+    'Quantity' => 'Menge',
+    'Service' => 'Dienstleistung',
+    'Status' => 'Status',
+    'Mode' => 'Modus',
+    'Created' => 'Erstellt',
+    '{start} to {end} of {total}' => ' {start} bis {end} von {total}',
+    'All' => 'Alle',
+    'Manual' => 'Manual',
+    'Auto' => 'Auto',
+];
