@@ -21,7 +21,12 @@ docker compose -f docker/docker-compose.yaml down
 docker-compose -f docker/docker-compose.yaml exec -w /app php-fpm php yii migrate
 ```
 
-### 3. команда выполнения миграции с дампом данных
+### 3. Команда выполнения миграции с дампом данных
 ```bash
 cat migrations/test_db_data.sql | docker compose -f docker/docker-compose.yaml exec -T mysql mysql -u root -pyour_mysql_root_password yii2_db
+```
+
+### 4. Ссылка на страницу модуля
+```
+http:localhost:8080/order/table
 ```
