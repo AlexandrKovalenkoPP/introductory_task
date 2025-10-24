@@ -81,6 +81,11 @@ $config = [
                 ],
             ],
         ],
+        'assetManager' => [
+            'linkAssets' => false, // или true, если хочешь симлинки
+            'basePath' => '@webroot/assets',
+            'baseUrl' => '@web/assets',
+        ],
         'language' => 'ru',
 //        'language' => 'en-US',
     ],
