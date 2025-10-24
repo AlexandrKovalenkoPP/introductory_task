@@ -4,13 +4,13 @@
 
 ### 1. Сборка и запуск контейнеров
 
-Эта команда собирает образы (если они не существуют), создает контейнеры и запускает их в фоновом режиме (`-d`).
+#### 1.1 Эта команда собирает образы (если они не существуют), создает контейнеры и запускает их в фоновом режиме (`-d`).
 
 ```bash
 docker compose -f docker/docker-compose.yaml up --build -d
 ```
 
-Остановка проекта
+#### 1.2 Остановка проекта
 ```bash
 docker compose -f docker/docker-compose.yaml down
 ```
@@ -26,7 +26,12 @@ docker-compose -f docker/docker-compose.yaml exec -w /app php-fpm php yii migrat
 cat migrations/test_db_data.sql | docker compose -f docker/docker-compose.yaml exec -T mysql mysql -u root -pyour_mysql_root_password yii2_db
 ```
 
-### 4. Ссылка на страницу модуля
+### 4. Установка зависимостей Composer
+```bash
+docker-compose -f docker/docker-compose.yaml exec -w /app php-fpm composer install
+```
+
+### 5. Ссылка на страницу модуля
 ```
 http:localhost:8080/order/table
 ```
