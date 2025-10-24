@@ -160,7 +160,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
     echo Html::endTag('ul');
 
-    $exportRoute = ['export/export-csv'];
+    $exportRoute = ['export/export-orders-from-table-csv'];
     $exportUrl = Url::to(array_merge($exportRoute, $currentParams));
     echo Html::tag('div', Html::a(
         Html::tag('span', '', ['class' => 'glyphicon glyphicon-download-alt']) . ' Export CSV',
