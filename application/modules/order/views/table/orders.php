@@ -6,8 +6,8 @@
  * @var Pagination $pages
  */
 
-use app\assets\OrderPageAsset;
 use app\components\Table\ColumnsHeader;
+use app\modules\order\assets\OrderPageAsset;
 use app\modules\order\models\Orders;
 use app\modules\order\Module;
 use yii\data\Pagination;
