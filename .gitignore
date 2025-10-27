@@ -5,3 +5,5 @@
 db_data/
 
 docker/.env
+
+application/web/assets/

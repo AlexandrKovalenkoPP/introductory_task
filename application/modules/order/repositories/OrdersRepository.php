@@ -42,6 +42,7 @@ class OrdersRepository
 
         foreach ($filteredParams as $key => $value) {
             $this->params->{$key} = match ($key) {
+                'search' => str_replace('+', ' ', $value),
                 'status' => array_search(ucfirst($value), Orders::getStatusList()),
                 'mode' => array_search(ucfirst($value), Orders::getModeList()),
                 default => $value
@@ -64,7 +65,7 @@ class OrdersRepository
         $result->columns = $this->getColumns();
         $result->footer = new stdClass();
         $result->footer->start = 1;
-        $result->footer->end = $this->limit;
+        $result->footer->end = min($result->total, $this->limit);
 
         return $result;
     }

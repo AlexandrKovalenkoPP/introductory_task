@@ -10,6 +10,8 @@ use yii\web\Controller;
 
 class TableController extends Controller
 {
+    public $layout = false;
+
     /**
      * {@inheritdoc}
      */
@@ -39,12 +41,17 @@ class TableController extends Controller
 
         $searchModel = new OrdersSearch();
         $searchModel->load($params, '');
-        $result = (new OrdersRepository())->setParams($params)->query()->result();
+        $result = (new OrdersRepository())->setParams($params)->query();
 
         return $this->render('orders', [
-            'result' => $result,
+            'pages' => new Pagination([
+                'totalCount' => $result->getTotal(),
+                'pageSize' => $result->limit,
+                'pageSizeParam' => false,
+                'forcePageParam' => true,
+            ]),
+            'result' => $result->result(),
             'searchModel' => $searchModel,
-            'pages' => new Pagination(['totalCount' => $result->total]),
             'tabs' => $searchModel->getTabs($this->id),
             'status' => $params['status'],
         ]);

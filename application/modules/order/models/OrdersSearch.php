@@ -40,7 +40,7 @@ class OrdersSearch extends Model
 
         $tabs[] = [
             'label' => Yii::t(Module::I18N_CATEGORY, 'All orders'),
-            'url' => Url::to(["$controllerId/index"]),
+            'url' => Url::to(["table"]),
             'slug' => null
         ];
 
@@ -48,7 +48,7 @@ class OrdersSearch extends Model
             $slug = strtolower(str_replace(' ', '', $value));
             $tabs[] = [
                 'label' => Yii::t(Module::I18N_CATEGORY, $value),
-                'url' => Url::to(["$controllerId/$slug"]),
+                'url' => Url::to(["table/$slug"]),
                 'slug' => $slug
             ];
         }

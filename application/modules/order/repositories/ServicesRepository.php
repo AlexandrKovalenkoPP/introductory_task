@@ -41,13 +41,13 @@ class ServicesRepository
             return $carry + $item['amount'];
         });
 
-        $list[] = (object) [
+        $list[] = [
             'id' => null,
             'tag' => Html::tag('span', $allCount, ['class' => 'label-id']) . ' All',
         ];
         foreach ($data as $item) {
-            $list[] = (object) [
-                'id' => $item['id'],
+            $list[] = [
+                'id' => (int) $item['id'],
                 'tag' => Html::tag('span', $item['amount'], ['class' => 'label-id']) . ' ' . $item['name']
             ];
         }

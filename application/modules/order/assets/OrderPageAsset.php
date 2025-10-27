@@ -21,6 +21,6 @@ class OrderPageAsset extends AssetBundle
     ];
 
     public $depends = [
-        'yii\web\YiiAsset',
+
     ];
 }

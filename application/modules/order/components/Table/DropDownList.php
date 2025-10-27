@@ -15,10 +15,16 @@ class DropDownList
      * @param string $title Метка кнопки ('Service', 'Mode').
      * @param array $list Данные для списка [id => ['name' => 'Name', 'amount' => 123]] или [id => 'Name'].
      * @param string $attribute Имя GET-параметра (напр. 'service_id' или 'mode').
+     * @param array $currentParams
+     * @param array $baseRoute
+     * @return void
      */
     public static function dropDownList(string $title, array $list, array $currentParams, array $baseRoute, string $attribute): void
     {
-        $activeValue = $currentParams[$attribute] ?? null;
+        $activeValue = null;
+        if (isset($currentParams[$attribute])) {
+            $activeValue = (int)$currentParams[$attribute];
+        }
 
         echo Html::beginTag('th', ['class' => 'dropdown-th']);
         echo Html::beginTag('div', ['class' => 'dropdown']);
@@ -36,10 +42,10 @@ class DropDownList
         unset($allParams['page']);
 
         foreach ($list as $id => $data) {
-            $itemParams = array_merge($currentParams, [$attribute => $data->id]);
+            $itemParams = array_merge($currentParams, [$attribute => $data['id']]);
             $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
-            $isActive = ($activeValue == $id);
-            echo Html::tag('li', Html::a($data->tag, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
+            $isActive = ($activeValue === $data['id']);
+            echo Html::tag('li', Html::a($data['tag'], $itemUrl), ['class' => ($isActive ? 'active' : '')]);
         }
 
         echo Html::endTag('ul');
