@@ -1,14 +1,24 @@
 <?php
 
-namespace app\modules\order\repositories;
+namespace order\repositories;
 
-use app\modules\order\models\Orders;
-use app\modules\order\models\Services;
+use order\components\Table\DropDownList;
+use order\models\Orders;
+use order\models\Services;
 use yii\db\Query;
 use yii\helpers\Html;
 
+/**
+ * Репозиторий получения списка сервисов для {@see DropDownList::dropDownList()}
+ */
 class ServicesRepository
 {
+    /**
+     * Список на основе входных параметров
+     *
+     * @param $status
+     * @return array
+     */
     public static function getServicesForFilter($status = null): array
     {
         $list = [];
@@ -41,7 +51,6 @@ class ServicesRepository
                 'tag' => Html::tag('span', $item['amount'], ['class' => 'label-id']) . ' ' . $item['name']
             ];
         }
-//        var_dump($list); die();
 
         return $list;
     }

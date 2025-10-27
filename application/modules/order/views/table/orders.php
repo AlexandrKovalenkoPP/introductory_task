@@ -2,14 +2,15 @@
 
 /**
  * @var stdClass $result
- * @var $status
  * @var Pagination $pages
+ * @var $tabs
+ * @var $searchModel
+ * @var $status
  */
 
-use app\components\Table\ColumnsHeader;
-use app\modules\order\assets\OrderPageAsset;
-use app\modules\order\models\Orders;
-use app\modules\order\Module;
+use order\assets\OrderPageAsset;
+use order\components\Table\ColumnsHeader;
+use order\components\Table\DropDownList;
 use yii\data\Pagination;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -21,6 +22,16 @@ $currentAction = Yii::$app->controller->action->id;
 $controllerId = Yii::$app->controller->id;
 $baseRoute = [$controllerId . '/' . $currentAction];
 $currentParams = Yii::$app->request->queryParams;
+
+$css = <<<CSS
+.label-default {
+  border: 1px solid #ddd;
+  background: none;
+  color: #333;
+  min-width: 30px;
+  display: inline-block;
+}
+CSS;
 
 /**
  * Добавляем очистку данных в GET
@@ -38,220 +49,135 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 JS);
 
-/**
- * Генерирует HTML для выпадающего меню фильтрации.
- * @param string $title Метка кнопки ('Service', 'Mode').
- * @param array $list Данные для списка [id => ['name' => 'Name', 'amount' => 123]] или [id => 'Name'].
- * @param string $attribute Имя GET-параметра (напр. 'service_id' или 'mode').
- */
-function dropDownList(string $title, array $list, array $currentParams, array $baseRoute, string $attribute): void
-{
-    $activeValue = $currentParams[$attribute] ?? null;
+echo '<!DOCTYPE html>';
+echo Html::beginTag('html', ['lang' => 'en']);
 
-    echo Html::beginTag('th', ['class' => 'dropdown-th']);
-    echo Html::beginTag('div', ['class' => 'dropdown']);
+echo Html::beginTag('head');
+echo Html::tag('meta', ['charset' => 'utf-8']);
+echo Html::tag('meta', ['http-equiv' => 'X-UA-Compatible', 'content' => 'IE=edge']);
+echo Html::tag('meta', ['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1']);
+echo Html::tag('title', '');
+echo Html::style($css);
+echo Html::endTag('head');
 
-    echo Html::tag('button',
-            $title . Html::tag('span', '', ['class' => 'caret']),
-            ['class' => 'btn btn-th btn-default dropdown-toggle', 'data-toggle' => 'dropdown']
-    );
+echo Html::beginTag('body');
+echo Html::beginTag('nav', ['class' => 'navbar navbar-fixed-top navbar-default']);
+echo Html::beginTag('div', ['class' => 'container-fluid']);
+echo Html::beginTag('div', ['class' => 'navbar-header']);
+echo Html::button(
+        Html::tag('span', 'Toggle navigation', ['class' => 'sr-only']) .
+        Html::tag('span', '', ['class' => 'icon-bar']) .
+        Html::tag('span', '', ['class' => 'icon-bar']) .
+        Html::tag('span', '', ['class' => 'icon-bar']),
+        [
+                'type' => 'button',
+                'class' => 'navbar-toggle collapsed',
+                'data-toggle' => 'collapse',
+                'data-target' => '#bs-navbar-collapse'
+        ]
+);
+echo Html::endTag('div');
 
-    echo Html::beginTag('ul', ['class' => 'dropdown-menu']);
+echo Html::beginTag('div', ['class' => 'collapse navbar-collapse', 'id' => 'bs-navbar-collapse']);
+echo Html::beginTag('ul', ['class' => 'nav navbar-nav']);
+echo Html::tag('li',
+        Html::a('Orders', '#'),
+        ['class' => 'active']
+);
+echo Html::endTag('ul');
+echo Html::endTag('div');
 
-    $allParams = $currentParams;
-    unset($allParams[$attribute]);
-    $allParams = array_filter($allParams, function($value) { return $value !== null && $value !== ''; });
-    unset($allParams['page']);
-    $allUrl = Url::to(array_merge($baseRoute, $allParams));
+echo Html::endTag('div');
+echo Html::endTag('nav');
 
-    $isAllActive = is_null($activeValue) || $activeValue === '';
+echo Html::beginTag('div', ['class' => 'container-fluid']);
+echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
 
-    foreach ($list as $id => $data) {
-        $itemParams = array_merge($currentParams, [$attribute => $data->id]);
-        $itemUrl = Url::to(array_merge($baseRoute, $itemParams));
-        $isActive = ($activeValue == $id);
-        echo Html::tag('li', Html::a($data->tag, $itemUrl), ['class' => ($isActive ? 'active' : '')]);
-    }
-
-    echo Html::endTag('ul');
-    echo Html::endTag('div');
-    echo Html::endTag('th');
+foreach ($tabs as $tab) {
+    echo Html::beginTag('li', ['class' => $tab['slug'] === $status ? 'active' : '']);
+    echo Html::a($tab['label'], $tab['url']);
+    echo Html::endTag('li');
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-  <style>
-    .label-default{
-      border: 1px solid #ddd;
-      background: none;
-      color: #333;
-      min-width: 30px;
-      display: inline-block;
-    }
-  </style>
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-  <![endif]-->
-</head>
-<body>
-<nav class="navbar navbar-fixed-top navbar-default">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-    </div>
-    <div class="collapse navbar-collapse" id="bs-navbar-collapse">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Orders</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-<div class="container-fluid">
-<?php
-    echo Html::beginTag('ul', ['class' => 'nav nav-tabs p-b']);
+echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
+echo Html::beginForm([$this->context->id . '/index'], 'get', ['class' => 'form-inline', 'id' => 'search-form']);
+echo Html::beginTag('div', ['class' => 'input-group']);
+echo Html::input('text', 'search', $searchModel->search, ['class' => 'form-control', 'placeholder' => 'Search orders']);
+echo Html::beginTag('span', ['input-group-btn search-select-wrap']);
+echo Html::dropDownList('searchType', $searchModel->searchType, $searchModel->getSearchOptions(), ['class' => 'form-control search-select']);
+echo Html::submitButton(Html::tag('span', '', ['class' => 'glyphicon glyphicon-search']), ['class' => 'btn btn-default']);
+echo Html::endTag('span');
+echo Html::endTag('div');
+echo Html::endForm();
+echo Html::endTag('li');
 
-        echo Html::tag('li', Html::a(Yii::t(Module::I18N_CATEGORY, 'All orders'), Url::to([$controllerId.'/index'])), ['class' => (is_null($status) ? 'active' : '')]);
-        foreach (Orders::getStatusList()as $key => $value) {
-            $slug = strtolower(str_replace(' ', '', $value));
-            $url = Url::to(["$controllerId/$slug"]);
-            echo Html::tag(
-                    'li',
-                    Html::a(Yii::t(Module::I18N_CATEGORY, $value), $url),
-                    ['class' => ($status == $key ? 'active' : '')]
-            );
-        }
+echo Html::endTag('ul');
 
-        $searchQuery = Yii::$app->request->get('search', '');
-        $searchType = Yii::$app->request->get('searchType', 'id');
-
-        $searchOptions = [
-            'id' => 'Order ID',
-            'link' => 'Link',
-            'user' => 'Username',
-        ];
-
-        echo Html::beginTag('li', ['class' => 'pull-right custom-search']);
-        echo Html::beginForm($baseRoute, 'get', ['class' => 'form-inline', 'id' => 'search-form']);
-        echo Html::beginTag('div', ['class' => 'input-group']);
-        echo Html::input('text', 'search', $searchQuery, ['class' => 'form-control', 'placeholder' => 'Search orders']);
-        echo Html::beginTag('span', ['class' => 'input-group-btn search-select-wrap']);
-        echo Html::dropDownList('searchType', $searchType, $searchOptions, ['class' => 'form-control search-select']);
-        echo Html::submitButton(
-          Html::tag('span', '', ['class' => 'glyphicon glyphicon-search', 'aria-hidden' => 'true']),
-          ['class' => 'btn btn-default']);
-        echo Html::endTag('span');
-        echo Html::endTag('div');
-        echo Html::endForm();
-        echo Html::endTag('li');
-
-    echo Html::endTag('ul');
-
-    $exportRoute = ['export/export-orders-from-table-csv'];
-    $exportUrl = Url::to(array_merge($exportRoute, $currentParams));
-    echo Html::tag('div', Html::a(
+$exportRoute = ['export/export-orders-from-table-csv'];
+$exportUrl = Url::to(array_merge($exportRoute, $currentParams));
+echo Html::tag('div', Html::a(
         Html::tag('span', '', ['class' => 'glyphicon glyphicon-download-alt']) . ' Export CSV',
         $exportUrl,
         ['class' => 'btn btn-primary pull-right', 'style' => 'margin-top: -35px;']),
         ['class' => 'clearfix']
-    );
+);
 
-    /** Таблица */
-    echo Html::beginTag('table', ['class' => 'table order-table']);
-
-    /** Заголовок */
-    echo Html::beginTag('thead');
+echo Html::beginTag('table', ['class' => 'table order-table']);
+echo Html::beginTag('thead');
+echo Html::beginTag('tr');
+foreach ($result->columns as $column) {
+    switch ($column->type) {
+        case ColumnsHeader::COLUMN_STRING:
+            echo Html::beginTag('th');
+            echo $column->header;
+            echo Html::endTag('th');
+            break;
+        case ColumnsHeader::COLUMN_DROPDOWN:
+            DropDownList::dropDownList($column->header, $column->list, $currentParams, $baseRoute, $column->key);
+            break;
+    };
+}
+echo Html::endTag('tr');
+echo Html::endTag('thead');
+echo Html::beginTag('tbody');
+foreach ($result->data as $order) {
     echo Html::beginTag('tr');
-
     foreach ($result->columns as $column) {
-        switch ($column->type) {
-            case ColumnsHeader::COLUMN_STRING:
-                echo Html::beginTag('th');
-                echo $column->header;
-                echo Html::endTag('th');
-                break;
-            case ColumnsHeader::COLUMN_DROPDOWN:
-                dropDownList($column->header, $column->list, $currentParams, $baseRoute, $column->key);
-                break;
-        };
-    }
-
-    echo Html::endTag('th');
-    /** Конец заголовка */
-    echo Html::endTag('thead');
-
-    /** Тело таблицы */
-    echo Html::beginTag('tbody');
-    foreach ($result->data as $order) {
-        echo Html::beginTag('tr');
-
-        foreach ($result->columns as $column) {
-            echo Html::beginTag('td');
-            if ($column->key == 'created') {
-                $date = (new DateTime())->setTimestamp($order[$column->key]);
-                echo Html::tag('span', $date->format('Y-m-d'), ['class' => 'nowrap']);
-                echo Html::tag('span', $date->format('H:i:s'), ['class' => 'nowrap']);
-            } else {
-                echo $order[$column->key];
-            }
-            echo Html::endTag('td');
+        echo Html::beginTag('td');
+        if ($column->key == 'created') {
+            $date = (new DateTime())->setTimestamp($order[$column->key]);
+            echo Html::tag('span', $date->format('Y-m-d'), ['class' => 'nowrap']);
+            echo Html::tag('span', $date->format('H:i:s'), ['class' => 'nowrap']);
+        } else {
+            echo $order[$column->key];
         }
-
-        echo Html::endTag('tr');
+        echo Html::endTag('td');
     }
+    echo Html::endTag('tr');
+}
+echo Html::endTag('tbody');
+echo Html::endTag('table');
 
-    /** Конец тела таблицы */
-    echo Html::endTag('tbody');
+echo Html::beginTag('div', ['class' => 'row']);
+echo Html::beginTag('div', ['class' => 'col-sm-8']);
+echo LinkPager::widget(['pagination' => $pages]);
+echo Html::endTag('div');
 
-
-    /** Конец таблицы */
-    echo Html::endTag('table');
-
-    echo Html::beginTag('div', ['class' => 'row']);
-    echo Html::beginTag('div', ['class' => 'col-sm-8']);
-
-    /** Пагинация */
-    echo Html::beginTag('nav');
-    echo Html::beginTag('ul', ['class' => 'pagination']);
-
-    echo LinkPager::widget(['pagination' => $pages]);
-
-    echo Html::endTag('ul');
-    echo Html::endTag('nav');
-    echo Html::endTag('div');
-
-    echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
-    echo Yii::t(
-            'order-module',
-            '{start} to {end} of {total}',
-            [
+echo Html::beginTag('div', ['class' => 'col-sm-4 pagination-counters']);
+echo Yii::t(
+        'order-module',
+        '{start} to {end} of {total}',
+        [
                 'start' => $result->footer->start,
                 'end' => $result->footer->end,
                 'total' => $result->total
-            ]
-    );
-    echo Html::endTag('div');
+        ]
+);
+echo Html::endTag('div');
+echo Html::endTag('div');
 
-    echo Html::endTag('div');
-
+echo Html::endTag('div');
+echo Html::endTag('body');
+echo Html::endTag('html');
 
 ?>
-
-
-
-</div>
-<!--<script src="js/jquery.min.js"></script>-->
-<!--<script src="js/bootstrap.min.js"></script>-->
-</body>
-<html>

@@ -10,10 +10,11 @@ $config = [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
+//        '@order' => 'app/modules/order',
     ],
     'modules' => [
         'order' => [
-            'class' => 'app\modules\order\Module',
+            'class' => 'order\Module',
         ]
     ],
     'components' => [
@@ -52,9 +53,9 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 [
-                    'pattern' => 'order/table/<statusSlug>',
+                    'pattern' => 'order/table/<status>',
                     'route' => 'order/table/index',
-                    'defaults' => ['statusSlug' => ''],
+                    'defaults' => ['status' => ''],
                 ],
                 'order/table' => 'order/table/index',
                 'order' => 'order/table/index',

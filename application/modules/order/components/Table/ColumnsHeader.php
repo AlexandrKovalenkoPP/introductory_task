@@ -1,6 +1,6 @@
 <?php
 
-namespace app\components\Table;
+namespace order\components\Table;
 
 use Yii;
 

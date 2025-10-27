@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\order\models;
+namespace order\models;
 
 use yii\db\ActiveRecord;
 
@@ -31,6 +31,9 @@ class Services extends ActiveRecord
         ];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function rules(): array
     {
         return [

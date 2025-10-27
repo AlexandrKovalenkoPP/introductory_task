@@ -1,12 +1,14 @@
 <?php
 
-namespace app\modules\order\repositories;
+namespace order\repositories;
 
-use app\components\Table\ColumnsHeader;
-use app\modules\order\models\Orders;
-use app\modules\order\models\Services;
-use app\modules\order\models\Users;
-use app\modules\order\Module;
+use order\components\Params;
+use order\components\Table\ColumnsHeader;
+use order\models\Orders;
+use order\models\OrdersSearch;
+use order\models\Services;
+use order\models\Users;
+use order\Module;
 use stdClass;
 use Yii;
 use yii\db\Query;
@@ -19,8 +21,8 @@ class OrdersRepository
     /** @var Query $query Запрос для получения данных */
     public Query $query;
 
-    /** @var stdClass $params GET параметры для фильтрации таблицы */
-    public stdClass $params;
+    /** @var Params $params GET параметры для фильтрации таблицы */
+    public Params $params;
 
     /** @var int Лимит количества строк */
     public int $limit = 100;
@@ -33,11 +35,18 @@ class OrdersRepository
      */
     public function setParams(array $params = []): self
     {
+        $this->params = new Params();
         $filteredParams = array_filter($params, function ($value) {
             return $value !== null && $value !== '';
         });
 
-        $this->params = (object) $filteredParams;
+        foreach ($filteredParams as $key => $value) {
+            $this->params->{$key} = match ($key) {
+                'status' => array_search(ucfirst($value), Orders::getStatusList()),
+                'mode' => array_search(ucfirst($value), Orders::getModeList()),
+                default => $value
+            };
+        }
 
         return $this;
     }
@@ -84,11 +93,12 @@ class OrdersRepository
 
         if (isset($this->params->status)) $this->query->andWhere(['orders.status' => $this->params->status]);
 
-        if (isset($this->params->search)) {
+        if (isset($this->params->search) && isset($this->params->searchType)) {
             match ($this->params->searchType) {
-                'id' => $this->query->andWhere(['orders.id' => $this->params->search]),
-                'link' => $this->query->andWhere(['like', 'orders.link', $this->params->search]),
-                'user' => $this->query->orWhere(['like', 'concat(users.first_name, " ", users.last_name)', $this->params->search]),
+                OrdersSearch::ID => $this->query->andWhere(['orders.id' => $this->params->search]),
+                OrdersSearch::LINK => $this->query->andWhere(['like', 'orders.link', $this->params->search]),
+                OrdersSearch::USER => $this->query->orWhere(['like', 'concat(users.first_name, " ", users.last_name)', $this->params->search]),
+                default => throw new \Exception('Unexpected match value'),
             };
         }
 

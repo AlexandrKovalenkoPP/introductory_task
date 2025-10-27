@@ -1,6 +1,6 @@
 <?php
 
-namespace app\components\Export;
+namespace order\components;
 
 use yii\db\Query;
 

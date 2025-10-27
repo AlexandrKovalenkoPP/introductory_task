@@ -1,13 +1,22 @@
 <?php
 
-namespace app\modules\order\repositories;
+namespace order\repositories;
 
-use app\modules\order\models\Orders;
-use app\modules\order\Module;
+use order\components\Table\DropDownList;
+use order\models\Orders;
+use order\Module;
 use Yii;
 
+/**
+ * Репозиторий получения списка модов для {@see DropDownList::dropDownList()}
+ */
 class ModesRepository
 {
+    /**
+     * Список
+     *
+     * @return object[]
+     */
     public static function getModesForFilter(): array
     {
         return [

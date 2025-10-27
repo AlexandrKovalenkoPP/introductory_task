@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\order;
+namespace order;
 
 use yii\base\Module as BaseModule;
 
@@ -13,5 +13,5 @@ class Module extends BaseModule
     public const string I18N_CATEGORY = 'order-module';
 
     /** @var string $controllerNamespace */
-    public $controllerNamespace = 'app\modules\order\controllers';
+    public $controllerNamespace = 'order\controllers';
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace app\modules\order\controllers;
+namespace order\controllers;
 
-use app\components\Export\ExportCSV;
-use app\modules\order\repositories\OrdersRepository;
+use order\components\ExportCSV;
+use order\repositories\OrdersRepository;
 use Yii;
 use yii\web\Controller;
 use yii\web\RangeNotSatisfiableHttpException;

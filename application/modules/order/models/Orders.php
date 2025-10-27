@@ -1,9 +1,7 @@
 <?php
 
-namespace app\modules\order\models;
+namespace order\models;
 
-use app\components\Translate\Translate;
-use Yii;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -64,6 +62,9 @@ class Orders extends ActiveRecord
         ];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function rules(): array
     {
         return [
@@ -95,17 +96,27 @@ class Orders extends ActiveRecord
         return $this->hasOne(Services::class, ['id' => 'service_id']);
     }
 
+    /**
+     * Список статусов заказов
+     *
+     * @return string[]
+     */
     public static function getStatusList(): array
     {
         return [
             self::STATUS_PENDING => 'Pending',
-            self::STATUS_IN_PROGRESS => 'In progress',
+            self::STATUS_IN_PROGRESS => 'Inprogress',
             self::STATUS_COMPLETED => 'Completed',
             self::STATUS_CANCELED => 'Cancelled',
             self::STATUS_FAIL => 'Fail',
         ];
     }
 
+    /**
+     * Список модов заказа
+     *
+     * @return string[]
+     */
     public static function getModeList(): array
     {
         return [
