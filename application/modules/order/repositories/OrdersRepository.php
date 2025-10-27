@@ -116,16 +116,16 @@ class OrdersRepository
      */
     public function getData(): array
     {
-        $orders = $this
+        $orders = [];
+
+        foreach ($this
             ->query
             ->offset(($this->params->page - 1) * $this->limit)
             ->limit($this->limit)
-            ->all();
-
-        foreach ($orders as $key => $value) {
-            $orders[$key]['status'] = Yii::t(Module::I18N_CATEGORY, Orders::getStatusList()[$value['status']]);
-            $orders[$key]['mode'] = Yii::t(Module::I18N_CATEGORY, Orders::getModeList()[$value['mode']]);
-
+            ->each() as $order) {
+            $order['status'] = Yii::t(Module::I18N_CATEGORY, Orders::getStatusList()[$order['status']]);
+            $order['mode'] = Yii::t(Module::I18N_CATEGORY, Orders::getModeList()[$order['mode']]);
+            $orders[] = $order;
         }
 
         return $orders;
