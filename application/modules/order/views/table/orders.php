@@ -86,8 +86,6 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title></title>
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-  <link href="css/custom.css" rel="stylesheet">
   <style>
     .label-default{
       border: 1px solid #ddd;
@@ -253,7 +251,7 @@ function dropDownList(string $title, array $list, array $currentParams, array $b
 
 
 </div>
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<!--<script src="js/jquery.min.js"></script>-->
+<!--<script src="js/bootstrap.min.js"></script>-->
 </body>
 <html>
