@@ -44,7 +44,9 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 # Назначаем права для пользователя www-data
 RUN chown -R www-data:www-data /app && chmod -R 775 /app
 
-RUN mkdir web/assets
+RUN mkdir -p /app/web/assets && chown -R www-data:www-data /app/web/assets && chmod -R 775 /app/web/assets
+
+RUN chown -R www-data:www-data /app && chmod -R 775 /app
 
 # Expose port
 EXPOSE 9000
