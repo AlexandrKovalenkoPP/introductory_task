@@ -23,9 +23,6 @@
 ```
 
 
-
-### 2. Установка зависимостей проекта
-
 #### 2. Установка зависимостей Composer
 ```bash
   docker-compose -f docker/docker-compose.yaml exec -w /app php-fpm composer install
@@ -42,5 +39,5 @@
 
 ### 4. Ссылка на страницу модуля
 ```
-http:localhost:8080/order/table
+http:localhost:8080
 ```
