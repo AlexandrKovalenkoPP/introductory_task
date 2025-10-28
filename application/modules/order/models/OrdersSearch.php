@@ -31,16 +31,15 @@ class OrdersSearch extends Model
     /**
      * Вкладки со статусами заказов над таблицей
      *
-     * @param string $controllerId
      * @return array
      */
-    public function getTabs(string $controllerId): array
+    public function getTabs(): array
     {
         $tabs = [];
 
         $tabs[] = [
             'label' => Yii::t(Module::I18N_CATEGORY, 'All orders'),
-            'url' => Url::to(["table"]),
+            'url' => Url::to(["/order"]),
             'slug' => null
         ];
 
@@ -48,7 +47,7 @@ class OrdersSearch extends Model
             $slug = strtolower(str_replace(' ', '', $value));
             $tabs[] = [
                 'label' => Yii::t(Module::I18N_CATEGORY, $value),
-                'url' => Url::to(["table/$slug"]),
+                'url' => Url::to(["/order/$slug"]),
                 'slug' => $slug
             ];
         }

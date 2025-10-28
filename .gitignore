@@ -2,7 +2,7 @@
 .idea
 
 # папка базы данных
-db_data/
+docker/db_data/
 
 docker/.env
 

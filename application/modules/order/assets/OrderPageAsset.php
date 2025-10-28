@@ -7,8 +7,6 @@ use yii\web\AssetBundle;
 class OrderPageAsset extends AssetBundle
 {
     public $sourcePath = '@app/modules/order/assets/src';
-//    public $basePath = '@webroot';
-//    public $baseUrl = '@web';
 
     public $css = [
         'css/bootstrap.min.css',

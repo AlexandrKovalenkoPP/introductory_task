@@ -10,7 +10,6 @@ $config = [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
-//        '@order' => 'app/modules/order',
     ],
     'modules' => [
         'order' => [
@@ -19,7 +18,6 @@ $config = [
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'GcwYgiDuiWhW_nKysU1LLvgfoTnd057o',
         ],
         'cache' => [
@@ -35,7 +33,6 @@ $config = [
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
-            // send all mails to a file by default.
             'useFileTransport' => true,
         ],
         'log' => [
@@ -53,12 +50,13 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 [
-                    'pattern' => 'order/table/<status>',
-                    'route' => 'order/table/index',
+                    'pattern' => 'order/<status>',
+                    'route' => 'order/index/list',
                     'defaults' => ['status' => ''],
                 ],
-                'order/table' => 'order/table/index',
-                'order' => 'order/table/index',
+                'order/list' => 'order/index/list',
+                'order' => 'order/index/list',
+                '/' => 'order/index/list'
             ]
         ],
         'i18n' => [
@@ -83,7 +81,7 @@ $config = [
             ],
         ],
         'assetManager' => [
-            'linkAssets' => false, // или true, если хочешь симлинки
+            'linkAssets' => false,
             'basePath' => '@webroot/assets',
             'baseUrl' => '@web/assets',
         ],

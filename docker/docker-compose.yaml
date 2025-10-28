@@ -8,12 +8,12 @@ services:
     container_name: yii2-mysql
     image: mysql:8.0
     ports:
-      - "3310:${DB_PORT}"
+      - "${DB_PORT}:${DB_PORT}"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     volumes:
-      - ../db_data:/var/lib/mysql
+      - ./db_data:/var/lib/mysql
     networks:
       - yii2-network
     restart: always
@@ -28,6 +28,7 @@ services:
       dockerfile: docker/php/Dockerfile
     volumes:
       - ../application:/app
+      - ../migrations:/migrations
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
